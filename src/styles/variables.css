@@ -1,0 +1,39 @@
+:root {
+  /* TODO@4: değişkenleri kendi scope larına veya componentlerine taşı */
+  /* #fff1e6 | #f1fdff | #fcfaeb | #e3f8f4*/
+  --DefaultBackgroundColor: #f1fdff;
+  --DefaultColor: #121212;
+  --DefaultLinkColor: #3c6dff;
+  --DefaultBorderColor: color-mod(var(--DefaultColor) a(5%));
+  --DefaultFontFamily: "Barlow", "Barlow Condensed", "Barlow Semi Condensed",
+    "Work Sans", "Karla", "Playfair Display", system-ui;
+  --DefaultLayoutPadding: 5em;
+  --DefaultTransition: 0.15s;
+  /* Components variables */
+  /* SidebarMenu */
+  --SidebarMenu_Size: 30em;
+  --SidebarMenu_FontSize: 1.35em;
+  --SidebarMenu_DotSize: 0.15em;
+  /* Toolbox */
+  --Toolbox_Size: 3em;
+  --Toolbox_FontSize: 0.75em;
+  /* SocialList */
+  --SocialList_Size: 25em;
+  /* FilterList */
+  --FilterList_Size: 20em;
+  --FilterList_FontSize: 1.35em;
+  --FilterList_DotSize: 1px;
+
+  --TwitterColor: #1da1f2;
+  --YoutubeColor: #cd201f;
+  --RaindropColor: #7fd0f7;
+  --InstagramColor: #d82d7e;
+  --DribbbleColor: #ea4c89;
+  --MediumColor: #15c767;
+  --SoundcloudColor: #ff5500;
+  --GithubColor: #161614;
+}
+
+/* Media Query tags */
+/* @custom-media --DesktopSmall screen and (width < 960px); */
+@custom-media --DesktopSmall screen and (width <= 1280px);

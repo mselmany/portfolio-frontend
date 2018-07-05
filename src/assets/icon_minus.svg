@@ -1,0 +1,14 @@
+<svg width="10" height="1" viewBox="0 0 10 1" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<title>nonselected</title>
+<desc>Created using Figma</desc>
+<g id="Canvas" transform="translate(1376 3914)">
+<g id="nonselected">
+<g id="Line (Stroke)">
+<use xlink:href="#path0_fill" transform="translate(-1376 -3914)"/>
+</g>
+</g>
+</g>
+<defs>
+<path id="path0_fill" fill-rule="evenodd" d="M 10 1L 0 1L 0 0L 10 0L 10 1Z"/>
+</defs>
+</svg>

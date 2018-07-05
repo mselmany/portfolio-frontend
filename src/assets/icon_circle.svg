@@ -1,0 +1,14 @@
+<svg width="8" height="8" viewBox="0 0 8 8" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<title>nonselected:v2</title>
+<desc>Created using Figma</desc>
+<g id="Canvas" transform="translate(1375 3906)">
+<g id="nonselected:v2">
+<g id="Ellipse (Stroke)">
+<use xlink:href="#path0_fill" transform="translate(-1375 -3906)"/>
+</g>
+</g>
+</g>
+<defs>
+<path id="path0_fill" fill-rule="evenodd" d="M 4 7C 5.65685 7 7 5.65685 7 4C 7 2.34315 5.65685 1 4 1C 2.34315 1 1 2.34315 1 4C 1 5.65685 2.34315 7 4 7ZM 4 8C 6.20914 8 8 6.20914 8 4C 8 1.79086 6.20914 0 4 0C 1.79086 0 0 1.79086 0 4C 0 6.20914 1.79086 8 4 8Z"/>
+</defs>
+</svg>

@@ -1,0 +1,14 @@
+<svg width="8" height="8" viewBox="0 0 8 8" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<title>unselect</title>
+<desc>Created using Figma</desc>
+<g id="Canvas" transform="translate(1375 3891)">
+<g id="unselect">
+<g id="Union">
+<use xlink:href="#path0_fill" transform="translate(-1375 -3891)"/>
+</g>
+</g>
+</g>
+<defs>
+<path id="path0_fill" d="M 3.8891 4.59619L 7.07104 7.77817L 7.77814 7.07106L 4.59619 3.88908L 7.77814 0.707108L 7.07104 0L 3.8891 3.18198L 0.707092 0L 0 0.707108L 3.18195 3.88908L 0 7.07106L 0.707092 7.77817L 3.8891 4.59619Z"/>
+</defs>
+</svg>

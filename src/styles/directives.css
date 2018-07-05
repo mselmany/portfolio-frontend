@@ -1,0 +1,34 @@
+[infinite-loader] {
+  --Padding: var(--DefaultLayoutPadding);
+  &::after {
+    content: attr(infinite-loader);
+    display: block;
+    position: relative;
+    padding-top: var(--Padding);
+    font-style: italic;
+    text-align: center;
+    letter-spacing: 0.05em;
+    animation: infinite-loader-DOT 0.5s infinite alternate;
+  }
+}
+@keyframes infinite-loader-FADE {
+  from {
+    opacity: 0.25;
+    transform: translateY(0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-0.25rem);
+  }
+}
+@keyframes infinite-loader-DOT {
+  33% {
+    content: attr(infinite-loader) ".";
+  }
+  66% {
+    content: attr(infinite-loader) "..";
+  }
+  100% {
+    content: attr(infinite-loader) "...";
+  }
+}

@@ -1,0 +1,14 @@
+<svg width="29" height="29" viewBox="0 0 29 29" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<title>more</title>
+<desc>Created using Figma</desc>
+<g id="Canvas" transform="translate(640 3859)">
+<g id="more">
+<g id="more">
+<use xlink:href="#path0_fill" transform="matrix(0.707107 0.707107 -0.707107 0.707107 -625.858 -3859)" fill="#FB3538"/>
+</g>
+</g>
+</g>
+<defs>
+<path id="path0_fill" fill-rule="evenodd" d="M 10.8333 10.8333L 10.8333 20L 9.16667 20L 9.16667 10.8333L 0 10.8333L 0 9.16667L 9.16667 9.16667L 9.16667 0L 10.8333 0L 10.8333 9.16667L 20 9.16667L 20 10.8333L 10.8333 10.8333Z"/>
+</defs>
+</svg>

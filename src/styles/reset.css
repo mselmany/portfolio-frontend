@@ -1,0 +1,36 @@
+@import url("@/../@csstools/normalize.css/normalize.css");
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  line-height: 1.35;
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+button {
+  background: inherit;
+  padding: 0;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.StyledLink a[href] {
+  color: var(--DefaultLinkColor);
+  text-decoration: none;
+  &::after {
+    content: " ꜛ";
+  }
+  &:hover {
+    text-decoration: underline;
+    &::after {
+      content: " ꜜ";
+    }
+  }
+}

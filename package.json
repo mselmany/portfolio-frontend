@@ -1,0 +1,61 @@
+{
+  "name": "portfolio-frontend",
+  "version": "0.1.0",
+  "description": "A portfolio app integrated with social media accounts, resumes, built-in articles and comments...",
+  "author": "numano <mselmany@hotmail.com>",
+  "license": "MIT",
+  "homepage": "https://bitbucket.org/mselmany/portfolio-frontend#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://mselmany@bitbucket.org/mselmany/portfolio-frontend.git"
+  },
+  "keywords": [
+    "frontend",
+    "vuejs",
+    "vuex",
+    "portfolioapp",
+    "social media",
+    "projects",
+    "article/comments",
+    "resume"
+  ],
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@csstools/normalize.css": "^8.0.0",
+    "axios": "^0.18.0",
+    "date-fns": "^1.29.0",
+    "register-service-worker": "^1.0.0",
+    "vue": "^2.5.16",
+    "vue-router": "^3.0.1",
+    "vuex": "^3.0.1",
+    "vuex-router-sync": "^5.0.0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.0.0-beta.15",
+    "@vue/cli-plugin-eslint": "^3.0.0-beta.15",
+    "@vue/cli-plugin-pwa": "^3.0.0-beta.15",
+    "@vue/cli-service": "^3.0.0-beta.15",
+    "@vue/eslint-config-prettier": "^3.0.0-rc.3",
+    "pleeease-filters": "^4.0.0",
+    "postcss-css-variables": "^0.9.0",
+    "postcss-easing-gradients": "^3.0.0",
+    "postcss-import": "^11.1.0",
+    "postcss-preset-env": "^5.2.1",
+    "postcss-url": "^7.3.2",
+    "rucksack-css": "^1.0.2",
+    "vue-template-compiler": "^2.5.16"
+  },
+  "engines": {
+    "node": ">= 8.0.0",
+    "npm": ">= 4.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ]
+}

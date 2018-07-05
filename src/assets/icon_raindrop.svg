@@ -1,0 +1,22 @@
+<svg width="30" height="30" viewBox="0 0 30 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<title>raindrop</title>
+<desc>Created using Figma</desc>
+<g id="Canvas" transform="translate(1182 3975)">
+<g id="raindrop">
+<g id="Vector">
+<use xlink:href="#path0_fill" transform="translate(-1172.73 -3966.75)" fill="url(#paint0_linear)"/>
+</g>
+<g id="Vector">
+<use xlink:href="#path1_fill" transform="translate(-1176 -3962.29)" fill="#7FD0F7"/>
+</g>
+</g>
+</g>
+<defs>
+<linearGradient id="paint0_linear" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(3.76364 -12.2719 14.175 4.12383 -9.59318 8.62619)">
+<stop offset="0" stop-color="#66BBFE"/>
+<stop offset="1" stop-color="#417FFF"/>
+</linearGradient>
+<path id="path0_fill" d="M 11.0361 6.40082C 11.096 6.08232 11.1273 5.75408 11.1273 5.41875C 11.1273 2.42606 8.63637 0 5.56364 0C 2.49092 0 0 2.42606 0 5.41875C 0 6.21416 0.175961 6.96956 0.492048 7.65L 0.654545 8.12813L 1.8 12.75L 11.4545 12.75C 13.262 12.75 14.7273 11.3229 14.7273 9.5625C 14.7273 7.80208 13.262 6.375 11.4545 6.375C 11.3128 6.375 11.1732 6.38377 11.0361 6.40082Z"/>
+<path id="path1_fill" d="M 0 4.30312C 0 6.50365 1.8 7.80937 3.76364 8.2875L 9.81818 8.2875C 10.6364 7.49062 12.2727 6.375 12.4364 4.14375C 12.4364 1.43438 10.9636 2.07311e-11 9 2.07311e-11C 8.01818 2.07311e-11 7.03636 0.796881 6.05455 1.9125C 5.4 0.956253 3.92727 3.03437e-06 3.27273 2.07311e-11C 1.6282 -7.62362e-06 0 2.10262 0 4.30312Z"/>
+</defs>
+</svg>

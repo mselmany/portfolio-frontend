@@ -1,0 +1,14 @@
+<svg width="10" height="8" viewBox="0 0 10 8" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<title>tick</title>
+<desc>Created using Figma</desc>
+<g id="Canvas" transform="translate(1375 3930)">
+<g id="tick">
+<g id="Rectangle 2 (Stroke)">
+<use xlink:href="#path0_fill" transform="translate(-1375 -3930)"/>
+</g>
+</g>
+</g>
+<defs>
+<path id="path0_fill" fill-rule="evenodd" d="M 0.784313 4.34163L 2.76352 6.4L 8.91736 0L 9.68659 0.8L 2.76352 8L 0 5.12594L 0.784313 4.34163Z"/>
+</defs>
+</svg>

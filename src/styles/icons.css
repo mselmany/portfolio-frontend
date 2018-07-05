@@ -1,0 +1,91 @@
+.Icon {
+  --Transition: var(--DefaultTransition);
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: initial;
+  /* background-size: contain; */
+  &.__actions {
+    /* transition: var(--Transition); */
+    &:hover {
+      opacity: 0.75;
+    }
+  }
+  &.__contrast {
+    filter: brightness(0) invert(1);
+  }
+  &.__menu {
+    background-image: url("../assets/icon_menu.svg");
+  }
+  &.__filter {
+    background-image: url("../assets/icon_filter.svg");
+  }
+  &.__close {
+    background-image: url("../assets/icon_close.svg");
+  }
+  &.__tick {
+    background-image: url("../assets/icon_tick.svg");
+  }
+  &.__circle {
+    background-image: url("../assets/icon_circle.svg");
+  }
+  &.__minus {
+    background-image: url("../assets/icon_minus.svg");
+  }
+  &.__unselect {
+    background-image: url("../assets/icon_unselect.svg");
+  }
+  &.__dribbble {
+    background-image: url("../assets/icon_dribbble.svg");
+  }
+  &.__github {
+    background-image: url("../assets/icon_github.svg");
+  }
+  &.__instagram {
+    background-image: url("../assets/icon_instagram.svg");
+  }
+  &.__medium {
+    background-image: url("../assets/icon_medium.svg");
+  }
+  &.__raindrop {
+    background-image: url("../assets/icon_raindrop.svg");
+  }
+  &.__soundcloud {
+    background-image: url("../assets/icon_soundcloud.svg");
+  }
+  &.__twitter {
+    background-image: url("../assets/icon_twitter.svg");
+  }
+  &.__youtube {
+    background-image: url("../assets/icon_youtube.svg");
+  }
+  &.__youtube2 {
+    background-image: url("../assets/icon_youtube_text.svg");
+  }
+  &.__plus {
+    background-image: url("../assets/icon_plus.svg");
+  }
+  &.__eye {
+    background-image: url("../assets/icon_eye.svg");
+  }
+  &.__eyeclose {
+    background-image: url("../assets/icon_eyeclose.svg");
+  }
+  &.__loading {
+    background-image: url("../assets/icon_loading.svg");
+  }
+  &.__warn {
+    background-image: url("../assets/icon_warn.svg");
+  }
+  &.__error {
+    background-image: url("../assets/icon_error.svg");
+  }
+  &.__back {
+    background-image: url("../assets/icon_back.svg");
+  }
+}
