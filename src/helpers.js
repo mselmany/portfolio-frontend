@@ -39,7 +39,7 @@ export function sort(
 
 export function modify(data = error("'data' is missing!")) {
   is("Array", data);
-  return data.map((item, index, list) => {
+  return data.map(item => {
     const date = new Date(item.date);
     const id = generateId();
     const groupName = format(date, "dddd, D MMMM YYYY", {
