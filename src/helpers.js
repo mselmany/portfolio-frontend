@@ -3,6 +3,7 @@ import { format, distanceInWordsToNow } from "date-fns";
 import en from "date-fns/locale/en";
 import tr from "date-fns/locale/tr";
 import global from "@/global";
+import messages from "@/messages";
 
 const locale = {
   en,
@@ -11,6 +12,22 @@ const locale = {
 
 export function error(message) {
   throw new Error(message);
+}
+
+export function required(needed) {
+  let missing = [];
+  for (const field in needed) {
+    if (needed.hasOwnProperty(field)) {
+      if (typeof needed[field] === "undefined") {
+        missing.push(field);
+      }
+    }
+  }
+  if (missing.length) {
+    error(
+      `${missing.length} ${messages.DATA_MISSING}: '${missing.join("', '")}'`
+    );
+  }
 }
 
 export function is(
