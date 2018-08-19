@@ -5,8 +5,8 @@
   --DefaultColor: #121212;
   --DefaultLinkColor: #3c6dff;
   --DefaultBorderColor: color-mod(var(--DefaultColor) a(5%));
-  --DefaultFontFamily: "Barlow", "Barlow Condensed", "Barlow Semi Condensed",
-    "Work Sans", "Karla", "Playfair Display", system-ui;
+  --DefaultFontFamily: "Chivo", "Barlow", "Barlow Condensed",
+    "Barlow Semi Condensed", "Work Sans", "Karla", "Playfair Display", system-ui;
   --DefaultLayoutPadding: 5em;
   --DefaultTransition: 0.15s;
   /* Components variables */
