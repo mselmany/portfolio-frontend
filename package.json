@@ -20,9 +20,9 @@
     "resume"
   ],
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "frontend:serve": "vue-cli-service serve",
+    "frontend:build": "vue-cli-service build",
+    "frontend:lint": "vue-cli-service lint"
   },
   "dependencies": {
     "@csstools/normalize.css": "^8.0.0",
