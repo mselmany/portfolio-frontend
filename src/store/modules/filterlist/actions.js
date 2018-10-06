@@ -1,6 +1,5 @@
 import { TOGGLE, TOGGLE_ALL } from "./types";
-import { error } from "@/helpers";
-
+import { error } from "@/helpers/utils";
 import router from "@/router";
 
 export default {

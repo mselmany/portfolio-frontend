@@ -1,5 +1,5 @@
 import { ACTIVATE_BY_TOOLBOX, TOGGLE_BUTTON } from "./types";
-import { error, is } from "@/helpers";
+import { error, is } from "@/helpers/utils";
 
 export default {
   [ACTIVATE_BY_TOOLBOX]({ routes }, name = error("'name' is missing!")) {

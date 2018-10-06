@@ -1,5 +1,5 @@
 export const NOTIFY = "NOTIFY";
-
+export const INIT = "INIT";
 export const LOADING = "LOADING";
 export const SET_NOTIFY = "SET_NOTIFY";
 export const DELETE_NOTIFY = "DELETE_NOTIFY";

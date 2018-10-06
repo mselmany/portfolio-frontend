@@ -1,18 +1,19 @@
 import axios from "axios";
 import messages from "@/messages";
-import global from "@/global";
-import { error, required } from "@/helpers";
+import { error, required } from "@/helpers/utils";
 
-class Api {
-  constructor({ baseURL }) {
+export class ApiBase {
+  constructor(axiosConfig = {}) {
+    required({ baseURL: axiosConfig.baseURL });
+
+    this.baseURL = axiosConfig.baseURL;
     this.messages = messages;
-    this.perpage = 10;
-    this.baseURL = baseURL;
-    this.client = axios.create({ baseURL });
+    this.client = axios.create(axiosConfig);
   }
 
   async get(endpoint, config = {}) {
     try {
+      this.required({ endpoint: endpoint || undefined });
       return await this.client.get(endpoint, config);
     } catch (err) {
       this.error(err);
@@ -27,5 +28,3 @@ class Api {
     required(needed);
   }
 }
-
-export default new Api({ baseURL: global.apiBaseUrl });

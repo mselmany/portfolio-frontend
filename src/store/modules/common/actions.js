@@ -4,7 +4,7 @@ import {
   SET_NOTIFY,
   TOGGLE_NOTIFICATION
 } from "./types";
-import { generateId, error } from "@/helpers";
+import { generateId, error } from "@/helpers/utils";
 import global from "@/global";
 import { notifications } from "@/configs";
 

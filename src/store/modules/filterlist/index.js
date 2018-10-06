@@ -5,11 +5,11 @@ import { filterlist } from "@/configs";
 
 const initialState = { ...filterlist };
 
-// select at least one if there is none selected
+/* // select at least one if there is none selected
 // TODO@2: eğer hiç öğesi yoksa olanı varsayılan olarak göster
 if (initialState.lists.filter(s => s.selected === true).length < 1) {
   initialState.lists[0].selected = true;
-}
+} */
 
 export default {
   namespaced: true,

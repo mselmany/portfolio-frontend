@@ -10,12 +10,23 @@ Vue.use(Vuex);
 
 const debug = process.env.NODE_ENV !== "production";
 
-export default new Vuex.Store({
-  modules: {
-    common,
-    toolbox,
-    filterlist,
-    sociallist
-  },
+const modules = {
+  common,
+  toolbox,
+  filterlist,
+  sociallist
+};
+
+const store = new Vuex.Store({
+  modules,
   strict: debug
 });
+
+// If exist, automatically run the `INIT` action for every module
+for (const m of Object.keys(modules)) {
+  if (modules[m].actions && modules[m].actions._INIT) {
+    store.dispatch(`${m}/_INIT`);
+  }
+}
+
+export default store;

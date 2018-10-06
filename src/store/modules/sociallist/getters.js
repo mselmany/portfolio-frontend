@@ -1,4 +1,4 @@
-import { filter } from "@/helpers";
+import { filter } from "@/helpers/utils";
 
 export default {
   filtered({ list }) {

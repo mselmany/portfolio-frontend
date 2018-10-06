@@ -55,6 +55,27 @@ export default {
       description: "numano",
       icon: "__instagram",
       selected: true
+    },
+    {
+      type: "pocket",
+      name: "Pocket",
+      description: "numano",
+      icon: "__pocket",
+      selected: true
+    },
+    {
+      type: "unsplash",
+      name: "Unsplash",
+      description: "numano",
+      icon: "__unsplash",
+      selected: true
+    },
+    {
+      type: "tumblr",
+      name: "Tumblr",
+      description: "mselmanyonline",
+      icon: "__tumblr",
+      selected: true
     }
   ]
 };

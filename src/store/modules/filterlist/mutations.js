@@ -1,7 +1,14 @@
 import { TOGGLE, TOGGLE_ALL } from "./types";
-import { error } from "@/helpers";
+import { INIT } from "@/store/modules/common/types";
+import { error } from "@/helpers/utils";
 
 export default {
+  [INIT](state, { data = error("'data' is missing!") }) {
+    const types = Object.entries(data)
+      .filter(([k, v]) => v)
+      .map(([k, v]) => k.toLowerCase());
+    state.lists = state.lists.filter(item => types.includes(item.type));
+  },
   [TOGGLE](state, { type = error("'type' is missing!"), enabled = null }) {
     const item = state.lists.find(s => s.type === type);
     const selectedOneOrMore =

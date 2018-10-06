@@ -8,7 +8,6 @@
 </template>
 
 <script>
-import Api from "@/Api";
 export default {
   name: "Home",
   data() {
@@ -20,10 +19,11 @@ export default {
   },
   methods: {
     async loader() {
-      console.log("w8");
-      const r = await Api.get("/bucket/list", {
+      const r = await this.$api.get(
+        "/bucket/list" /* {
         params: { filter: "twitter,github,medium,pocket" }
-      });
+      } */
+      );
       console.log(r);
     }
   }
