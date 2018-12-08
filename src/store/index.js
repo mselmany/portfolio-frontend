@@ -22,7 +22,7 @@ const store = new Vuex.Store({
   strict: debug
 });
 
-// If exist, automatically run the `INIT` action for every module
+// If exist, automatically run the `_INIT` action for every modules
 for (const m of Object.keys(modules)) {
   if (modules[m].actions && modules[m].actions._INIT) {
     store.dispatch(`${m}/_INIT`);

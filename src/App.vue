@@ -1,7 +1,7 @@
 <template>
-  <div id="app">
+  <div id="app" :class="css">
     <SidebarMenu>
-      <Toolbox slot="toolbox" />
+      <Toolbox slot="toolbox"/>
     </SidebarMenu>
     <router-view/>
     <Notification/>
@@ -9,11 +9,16 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
+
 export default {
-  name: "app"
+  name: "app",
+  computed: {
+    ...mapState("common", ["css"])
+  }
 };
 </script>
- 
+
 <style lang="postcss">
 @import url("./styles/index.css");
 #app {

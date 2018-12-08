@@ -1,0 +1,20 @@
+.-fontFamily-playfairDisplay {
+  font-family: "Playfair Display";
+}
+.-fontStyle-Italic {
+  font-style: italic;
+}
+.-textTransform-uppercase {
+  text-transform: uppercase;
+}
+.-textTransform-capitalize {
+  text-transform: capitalize;
+}
+.-float-right {
+  float: right;
+}
+.-clerfix:after {
+  content: "";
+  display: table;
+  clear: both;
+}

@@ -64,7 +64,7 @@ export default {
     {
       name: "back",
       icon: {
-        default: "__back"
+        default: "__back __white"
       },
       label: {
         default: "BACK",

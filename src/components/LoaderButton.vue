@@ -11,6 +11,7 @@
 // TODO@3: geliştir!
 
 import { mapState } from "vuex";
+import global from "@/global";
 
 export default {
   name: "LoaderButton",
@@ -21,7 +22,7 @@ export default {
     },
     limit: {
       type: Number,
-      default: 5
+      default: global.perpage
     }
   },
   computed: {
@@ -49,7 +50,7 @@ export default {
   --Transition: var(--DefaultTransition);
   font-size: 1rem;
   text-align: center;
-  margin-top: var(--Margin);
+  margin-bottom: var(--Margin);
 
   & > button {
     display: inline-block;

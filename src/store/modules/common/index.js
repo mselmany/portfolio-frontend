@@ -15,7 +15,8 @@ const initialState = {
     ...loading,
     queue: [],
     pending: false
-  }
+  },
+  css: []
 };
 
 export default {

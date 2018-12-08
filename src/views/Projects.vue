@@ -1,6 +1,5 @@
 <template>
-  <div id="Projects" class="Page">
-  </div>
+  <div id="Projects" class="Page"></div>
 </template>
 
 <script>

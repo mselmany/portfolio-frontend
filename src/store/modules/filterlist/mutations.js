@@ -4,15 +4,15 @@ import { error } from "@/helpers/utils";
 
 export default {
   [INIT](state, { data = error("'data' is missing!") }) {
-    const types = Object.entries(data)
-      .filter(([k, v]) => v)
-      .map(([k, v]) => k.toLowerCase());
-    state.lists = state.lists.filter(item => types.includes(item.type));
+    const types = Object.values(data)
+      .filter(({ success }) => success)
+      .map(({ source: { name } }) => name);
+    state.lists = state.lists.filter(({ type }) => types.includes(type));
   },
   [TOGGLE](state, { type = error("'type' is missing!"), enabled = null }) {
     const item = state.lists.find(s => s.type === type);
     const selectedOneOrMore =
-      state.lists.filter(s => s.selected === true).length > 1;
+      state.lists.filter(({ selected }) => selected).length > 1;
 
     if (!selectedOneOrMore && item.selected) return;
 
@@ -20,18 +20,18 @@ export default {
   },
   [TOGGLE_ALL](state) {
     const listLength = state.lists.length;
-    const selectedLength = state.lists.filter(s => s.selected === true).length;
+    const selectedLength = state.lists.filter(({ selected }) => selected)
+      .length;
     let willSelect;
 
     selectedLength === listLength ? (willSelect = false) : (willSelect = true);
 
-    state.lists.map((s, i) => {
+    state.lists.forEach((s, i) => {
       if (willSelect === false && i === 0) {
         s.selected = true;
       } else {
         s.selected = willSelect;
       }
-      return s;
     });
   }
 };

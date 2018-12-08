@@ -16,8 +16,11 @@
       opacity: 0.75;
     }
   }
-  &.__contrast {
+  &.__white {
     filter: brightness(0) invert(1);
+  }
+  &.__black {
+    filter: brightness(0) invert(0);
   }
   &.__menu {
     background-image: url("../assets/icon_menu.svg");
@@ -87,5 +90,14 @@
   }
   &.__back {
     background-image: url("../assets/icon_back.svg");
+  }
+  &.__next {
+    background-image: url("../assets/icon_next.svg");
+  }
+  &.__fullscreen {
+    background-image: url("../assets/icon_fullscreen.svg");
+  }
+  &.__fullscreenExit {
+    background-image: url("../assets/icon_fullscreen-exit.svg");
   }
 }

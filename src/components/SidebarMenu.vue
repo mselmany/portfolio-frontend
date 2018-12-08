@@ -1,6 +1,9 @@
 <template>
-  <section class="SidebarMenu" :class="{'__Active': isMenuActive, '__FilterActive': isFilterActive}">
-    <slot name="toolbox" />
+  <section
+    class="SidebarMenu"
+    :class="{'__Active': isMenuActive, '__FilterActive': isFilterActive}"
+  >
+    <slot name="toolbox"/>
     <div class="_Cirles">
       <div class="_Circle" v-for="i of 6" :key="i" :class="['__'+i]"></div>
     </div>

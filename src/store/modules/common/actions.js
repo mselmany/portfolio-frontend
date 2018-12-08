@@ -4,7 +4,7 @@ import {
   SET_NOTIFY,
   TOGGLE_NOTIFICATION
 } from "./types";
-import { generateId, error } from "@/helpers/utils";
+import { generateId } from "@/helpers/utils";
 import global from "@/global";
 import { notifications } from "@/configs";
 
@@ -15,15 +15,9 @@ export default {
     if (!state.notifications.enabled) return;
     let notification = notifications.hasOwnProperty(type)
       ? { ...notifications[type] }
-      : error("Invalid notification type!");
+      : { ...notifications["unknown"] };
     if (overrides) {
-      const { icon, title, message } = overrides;
-      notification = {
-        ...notification,
-        ...(icon && { icon }),
-        ...(title && { title }),
-        ...(message && { message })
-      };
+      notification = { ...notification, ...overrides };
     }
     let id = generateId();
     notification.id = id;

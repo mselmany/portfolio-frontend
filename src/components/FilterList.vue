@@ -1,13 +1,24 @@
 <template>
-  <section class="FilterList" :class="{'__Active': isFilterActive, '__AllSelected': selectedList.length === lists.length}">
+  <section
+    class="FilterList"
+    :class="{'__Active': isFilterActive, '__AllSelected': selectedList.length === lists.length}"
+  >
     <div class="_ScrollWrapper">
       <div class="_Selections">
         <div class="_Amount" v-if="allSelected">{{$t("ALL_ITEMS_SELECTED")}}</div>
-        <div class="_Amount" v-if="!allSelected">{{$t("ITEMS_SELECTED",[`${selectedList.length}/${lists.length}`, oneSelected ? "@ITEM" : "@ITEMS"])}}</div>
+        <div
+          class="_Amount"
+          v-if="!allSelected"
+        >{{$t("ITEMS_SELECTED",[`${selectedList.length}/${lists.length}`, oneSelected ? "@ITEM" : "@ITEMS"])}}</div>
         <div class="_Text">{{selectedsText}}</div>
       </div>
       <ol class="_List">
-        <li class="_Item __button" :class="{'__Selected': selectedList.length === lists.length, '__Shuffled': selectedList.length && selectedList.length !== lists.length}" @click="toggleAll()" @contextmenu="toggleAll($event)">
+        <li
+          class="_Item __button"
+          :class="{'__Selected': selectedList.length === lists.length, '__Shuffled': selectedList.length && selectedList.length !== lists.length}"
+          @click="toggleAll()"
+          @contextmenu="toggleAll($event)"
+        >
           <div class="_Logo"></div>
           <div class="_Name">
             <span>{{$t("TOGGLE")}}</span>
@@ -21,7 +32,14 @@
             </div>
           </div>
         </li>
-        <li class="_Item __withCounter" v-for="(item, index) in lists" :key="index" @click="toggle(item)" @contextmenu="toggleAll($event)" :class="{'__Selected': item.selected}">
+        <li
+          class="_Item __withCounter"
+          v-for="(item, index) in lists"
+          :key="index"
+          @click="toggle(item)"
+          @contextmenu="toggleAll($event)"
+          :class="{'__Selected': item.selected}"
+        >
           <div class="_Logo">
             <div class="_Icon Icon" :class="item.icon"></div>
           </div>

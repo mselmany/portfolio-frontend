@@ -3,7 +3,8 @@ import {
   DELETE_NOTIFY,
   LOADING,
   SET_NOTIFY,
-  TOGGLE_NOTIFICATION
+  TOGGLE_NOTIFICATION,
+  TOGGLE_CSS_CLASS
 } from "./types";
 
 export default {
@@ -30,5 +31,15 @@ export default {
   [TOGGLE_NOTIFICATION](state, enable = null) {
     state.notifications.enabled =
       enable !== null ? enable : !state.notifications.enabled;
+  },
+  [TOGGLE_CSS_CLASS](state, classes) {
+    is("Array", classes);
+    if (!classes.length) return;
+    let extract = state.css.filter(item => !classes.includes(item));
+    if (state.css.length === extract.length) {
+      state.css = [...state.css, ...classes];
+    } else {
+      state.css = [...extract];
+    }
   }
 };

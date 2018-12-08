@@ -1,44 +1,50 @@
-import { ADD } from "./types";
+import { ADD, MARK_AS_VIEWED } from "./types";
 import { INIT } from "@/store/modules/common/types";
-
-import { error, is, sort, modify } from "@/helpers/utils";
+import { error, is, sortBy, modify, markAsViewed } from "@/helpers/utils";
 
 export default {
-  [INIT](state, { data = error("'data' is missing!") }) {
+  [INIT](state, { data = error("'data' is missing!"), types }) {
     state.raw = data;
-    let list = Object.values(data).filter(({ success }) => success);
-    /* .reduce((arr0, { data }) => {
-        const ddd = Object.values(data).reduce((arr, part) => {
-          const __class = part.class.split(".")[0];
-          const __type = part.class.split(".")[1];
-          if (part.data instanceof Array) {
-            const data_arr = part.data.map(item => {
-              item.__class = __class;
-              item.__type = __type;
-              return item;
-            });
-            return arr.concat(data_arr);
-          } else {
-            return arr;
-          }
-        }, []);
-        return arr0.concat(ddd);
-      }, []); */
-    console.log(list);
+    let statics = {};
+    let list = Object.values(data)
+      // if successed (means has data)
+      .filter(({ success }) => success)
+      .reduce((total, { data: { staticitems, listitems }, source }) => {
+        // store static items by its source name
+        statics = { ...statics, [source.name]: staticitems };
+        // store list items all in one
+        return [...total, ...listitems];
+      }, [])
+      // sort by newest to older
+      .sort((a, b) => b.__createdAt - a.__createdAt)
+      // add some fields
+      .map(modify);
+
+    state.statics = statics;
+    // mark first items as viewed
+    state.viewed = markAsViewed({ list, types, page: state.page });
+    state.list = list;
   },
   [ADD](state, { data = error("'data' is missing!"), to = "bottom" }) {
     is("Array", data);
-    state.list = sort(
+    state.list = sortBy(
       [
-        ...(to === "top" ? modify(data) : []),
+        ...(to === "top" ? data.map(modify) : []),
         ...state.list,
-        ...(to === "bottom" ? modify(data) : [])
+        ...(to === "bottom" ? data.map(modify) : [])
       ],
-      [
-        { type: "date", ascending: false },
-        { type: "type", ascending: true },
-        { type: "action", ascending: true }
-      ]
+      [{ type: "__createdAt", ascending: false }]
     );
+  },
+  [MARK_AS_VIEWED](state, { types, amount }) {
+    state.viewed = [
+      ...state.viewed,
+      ...markAsViewed({
+        list: state.list,
+        types,
+        amount,
+        page: state.page
+      })
+    ];
   }
 };

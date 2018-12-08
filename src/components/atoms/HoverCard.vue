@@ -1,17 +1,21 @@
 <template>
-  <span class="HoverCard" :class="'__' + data.type">
-    <slot/>
-    <div class="_Wrapper">
+  <span class="HoverCard" :class="'__' + type">
+    <div class="Icon" :class="'__'+type"></div>
+    <div class="_Wrapper" v-if="selectedListTypes.length > 1">
       <div class="_Content">
         <div class="_Icon">
-          <div class="Icon" :class="'__'+data.type"></div>
+          <div class="Icon" :class="'__'+type"></div>
         </div>
         <div class="_Meta">
-          <div class="_Type" :data-length="filteredLength([data.type]) || null">{{data.type}}</div>
+          <div class="_Type" :data-length="filteredLength([type]) || null">{{type}}</div>
           <div class="_Source">
-            <router-link :to="{name: 'social', query: {types: data.type}}" class="_Link" :title="$t('FILTER_DESCRIPTION', [data.type])">{{$t("FILTER")}}</router-link>
+            <router-link
+              class="_Link"
+              :to="{name: 'social', query: {types: type}}"
+              :title="$t('FILTER_DESCRIPTION', [type])"
+            >{{$t("FILTER")}}</router-link>
             <em>{{$t("OR")}}</em>
-            <a href="#4">{{$t("GO_SOURCE")}}</a>
+            <a :href="url" target="_blank" rel="noopener noreferrer">{{$t("GO_SOURCE")}}</a>
           </div>
         </div>
       </div>
@@ -25,8 +29,12 @@ import { mapGetters } from "vuex";
 export default {
   name: "HoverCard",
   props: {
-    data: {
-      type: Object,
+    type: {
+      type: String,
+      required: true
+    },
+    url: {
+      type: String,
       required: true
     }
   },
@@ -49,30 +57,30 @@ export default {
     }
   },
   computed: {
-    ...mapGetters("sociallist", ["filteredLength"])
+    ...mapGetters("sociallist", ["filteredLength"]),
+    ...mapGetters("filterlist", ["selectedListTypes"])
   }
 };
 </script>
 
 <style lang="postcss" scoped>
-@import url("../styles/variables.css");
+@import url("../../styles/variables.css");
 .HoverCard {
   --BackgroundColor: var(--DefaultColor);
   --Color: var(--DefaultBackgroundColor);
   --ColorContrast: var(--DefaultColor);
   --BorderColor: var(--BackgroundColor);
-
   --Padding: var(--DefaultLayoutPadding);
   --Transition: var(--DefaultTransition);
   --ArrowSize: 0.75em;
   --ContentHeight: 5em;
   --ContentPadding: 1em;
+  display: inline;
   width: 100%;
   height: 100%;
-  font-size: 0.85rem;
-  position: absolute;
-  top: 0;
-  left: 0;
+  font-size: 1rem;
+  position: relative;
+  padding-right: 1.65rem;
   transition: var(--Transition);
   user-select: none;
 

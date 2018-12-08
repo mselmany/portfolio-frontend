@@ -1,5 +1,6 @@
 import { ApiBase } from "./helpers";
 import global from "@/global";
+import list from "@/mock/list.json";
 
 class Bucket extends ApiBase {
   constructor(axiosConfig) {
@@ -8,7 +9,10 @@ class Bucket extends ApiBase {
 
   async list({ filter } = {}) {
     try {
-      return await this.get("/list", {
+      if (process.env.NODE_ENV === "development") {
+        return await Promise.resolve(list);
+      }
+      return this.get("/list", {
         params: {
           ...(filter && { filter })
         }

@@ -1,25 +1,35 @@
 import Vue from "vue";
 
+import atoms from "./atoms";
+import molecules from "./molecules";
+
+import Dribbble from "./Dribbble";
+import Twitter from "./Twitter";
+
 import Toolbox from "./Toolbox";
 import SidebarMenu from "./SidebarMenu";
 import FilterList from "./FilterList";
 import SocialList from "./SocialList";
-import SocialItem from "./SocialItem";
 import LoaderButton from "./LoaderButton";
 import Notification from "./Notification";
 import InfiniteLoader from "./InfiniteLoader";
-import HoverCard from "./HoverCard";
+
+const socialitems = {
+  Dribbble,
+  Twitter
+};
 
 const components = {
+  ...atoms,
+  ...molecules,
+  ...socialitems,
   Toolbox,
   SidebarMenu,
   FilterList,
   SocialList,
-  SocialItem,
   LoaderButton,
   Notification,
-  InfiniteLoader,
-  HoverCard
+  InfiniteLoader
 };
 
 Object.values(components).forEach(component => {

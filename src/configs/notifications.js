@@ -1,6 +1,6 @@
 export default {
   loading: {
-    icon: "__loading __contrast",
+    icon: "__loading __white",
     title: "PROCESS",
     message: "LOADING_MESSAGE"
   },
@@ -13,6 +13,11 @@ export default {
     icon: "__warn",
     title: "WARN",
     message: "WARN_MESSAGE"
+  },
+  unknown: {
+    icon: "__unknown",
+    title: "UNKNOWN",
+    message: "UNKNOWN_MESSAGE"
   },
   success: {
     icon: "__success",
@@ -30,7 +35,7 @@ export default {
     message: "DRIBBBLE_MESSAGE"
   },
   github: {
-    icon: "__github __contrast",
+    icon: "__github __white",
     title: "GITHUB",
     message: "GITHUB_MESSAGE"
   },

@@ -1,11 +1,11 @@
-export function getRamdomByTypeAsync(mock, type) {
+export function getRandomByTypeAsync(mock, type) {
   const delay = Math.round(Math.random() * 3) * 1000;
   return new Promise(resolve => {
-    setTimeout(() => resolve(getRamdomByType(mock, type)), delay);
+    setTimeout(() => resolve(getRandomByType(mock, type)), delay);
   });
 }
 
-export function getRamdomByType(mock, type) {
+export function getRandomByType(mock, type) {
   let filtered;
   if (type) {
     filtered = mock.filter(item => {

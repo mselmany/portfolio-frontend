@@ -1,14 +1,24 @@
 <template>
   <div class="Notification">
-    <div class="_Toolbar __container" :class="{'__Active': !loading.pending && !notifications.list.length}">
+    <div
+      class="_Toolbar __container"
+      :class="{'__Active': !loading.pending && !notifications.list.length}"
+    >
       <div class="_Item">
-        <div class="_Icon __toggle Icon __actions" :class="{'__show': !notifications.enabled}" @click="toggle($event)"></div>
+        <div
+          class="_Icon __toggle Icon __actions"
+          :class="{'__show': !notifications.enabled}"
+          @click="toggle($event)"
+        ></div>
         <span class="_Message">
           <!-- {{$t(notifications.enabled ? "HIDE_NOTIFICATION" : "SHOW_NOTIFICATION")}} -->
         </span>
       </div>
     </div>
-    <ul class="_List" :class="{'__container __Active': notifications.list.length || loading.pending}">
+    <ul
+      class="_List"
+      :class="{'__container __Active': notifications.list.length || loading.pending}"
+    >
       <li class="_Item __notification" v-for="(item, index) in notifications.list" :key="index">
         <div class="_Icon Icon" :class="[item.icon]"></div>
         <span class="_Title" v-if="item.title.length">{{$t(item.title)}}</span>
@@ -16,7 +26,10 @@
       </li>
       <li class="_Item __loading" v-if="loading.pending">
         <div class="_Icon Icon" :class="[loading.icon]"></div>
-        <span class="_Title" v-if="loading.title.length">{{loading.queue.length}} {{$t(loading.title)}}</span>
+        <span
+          class="_Title"
+          v-if="loading.title.length"
+        >{{loading.queue.length}} {{$t(loading.title)}}</span>
         <span class="_Message" v-if="loading.message.length">{{$t(loading.message)}}</span>
       </li>
     </ul>
@@ -41,6 +54,10 @@ export default {
     WARN: {
       tr: "Uyarı",
       en: "Warning"
+    },
+    UNKNOWN: {
+      tr: "Bilinmeyen",
+      en: "Unknown"
     },
     SUCCESS: {
       tr: "Başarı",
@@ -89,6 +106,10 @@ export default {
     WARN_MESSAGE: {
       tr: "Bu işlem yapılamaz.",
       en: "This process can not be done."
+    },
+    UNKNOWN_MESSAGE: {
+      tr: "Bilinmeyen işlem tipi.",
+      en: "Unknown process type."
     },
     SUCCESS_MESSAGE: {
       tr: "İşlem tamamlandı.",
@@ -168,7 +189,7 @@ export default {
   position: fixed;
   bottom: 0;
   left: 0;
-  z-index: 9999;
+  z-index: 9000;
   user-select: none;
 
   & ._Toolbar {
@@ -188,7 +209,7 @@ export default {
   }
 
   & .__container {
-    font-size: 0.8rem;
+    font-size: 1rem;
     padding: 0.75em;
     padding-right: 1.25em;
     display: none;

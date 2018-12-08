@@ -1,20 +1,17 @@
 <template>
   <div id="Social" class="Page">
-    <FilterList />
-    <SocialList v-infinite-loader="loader">
-      <SocialItem v-for="(item, index) in sociallist" :key="index" :data="item" :isgroup="item.groupName !== (index === 0 ? '' : sociallist[index - 1].groupName)" />
-      <!-- <LoaderButton :action="loader" :limit="1">Yükle</LoaderButton> -->
-    </SocialList>
+    <FilterList/>
+    <SocialList v-infinite-loader="loader"/>
+    <!-- <SocialList/> -->
+    <LoaderButton :action="loader" :limit="1">Yükle</LoaderButton>
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters, mapMutations, mapState } from "vuex";
-import { NOTIFY } from "@/store/modules/common/types";
-import { FETCH } from "@/store/modules/sociallist/types";
+import { MARK_AS_VIEWED } from "@/store/modules/sociallist/types";
 import { TOGGLE } from "@/store/modules/filterlist/types";
-
-import { randomFrom } from "@/mock";
+import { updateQuery } from "@/helpers/utils";
 
 export default {
   name: "Social",
@@ -23,42 +20,35 @@ export default {
       types: []
     };
   },
+  computed: {
+    ...mapState("filterlist", { filterlist: "lists" }),
+    ...mapGetters("filterlist", {
+      filterlist_selectedListTypes: "selectedListTypes"
+    })
+  },
   created() {
     if (!this.$route.query.types) {
-      this.$router.replace({
-        query: { types: this.selectedListTypes.join(",") }
-      });
+      updateQuery({ types: this.filterlist_selectedListTypes.join(",") }, true);
     }
     this.updateTypes(this.$route.query);
-    this.updateFilterlist(this.types);
+    this.updateFilterlist();
   },
   beforeRouteUpdate(to, from, next) {
     if (from.query.types) {
       this.updateTypes(to.query);
-      this.updateFilterlist(this.types);
+      this.updateFilterlist();
     }
     next();
   },
-  computed: {
-    ...mapState("filterlist", ["lists"]),
-    ...mapGetters("sociallist", ["filtered"]),
-    ...mapGetters("filterlist", ["selectedListTypes"]),
-    sociallist() {
-      return this.filtered(this.types);
-    }
-  },
   methods: {
     ...mapMutations("filterlist", [TOGGLE]),
-    ...mapActions("sociallist", [FETCH]),
-    ...mapActions("common", [NOTIFY]),
+    ...mapActions("sociallist", [MARK_AS_VIEWED]),
     async loader() {
-      const type = randomFrom(this.types);
-      await this[FETCH]({ type });
-      this[NOTIFY]({ type });
+      this[MARK_AS_VIEWED]({ types: this.filterlist_selectedListTypes });
     },
-    updateFilterlist(types) {
-      this.lists.forEach(item => {
-        const willSelect = types.includes(item.type);
+    updateFilterlist() {
+      this.filterlist.forEach(item => {
+        const willSelect = this.types.includes(item.type);
         if (item.selected === willSelect) return;
         this[TOGGLE]({
           type: item.type,
@@ -68,7 +58,8 @@ export default {
     },
     updateTypes(query) {
       this.types =
-        (query.types && query.types.split(",")) || this.selectedListTypes;
+        (query.types && query.types.split(",")) ||
+        this.filterlist_selectedListTypes;
     }
   }
 };

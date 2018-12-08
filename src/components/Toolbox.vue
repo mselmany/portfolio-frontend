@@ -1,7 +1,19 @@
 <template>
-  <div class="Toolbox" :class="{'__Active': activeButton, '__MenuActive': isMenuActive, '__FilterActive': isFilterActive}">
+  <div
+    class="Toolbox"
+    :class="{'__Active': activeButton, '__MenuActive': isMenuActive, '__FilterActive': isFilterActive}"
+  >
     <div class="_Box">
-      <button class="_Button" v-for="(item, index) in buttons" :key="index" @click="toggle(item)" :class="{'__Active': item.active}" :data-label="$t(item.label.default)" :data-label__hover="$t(item.label.hover)" :data-label__active="$t(item.label.active)">
+      <button
+        class="_Button"
+        v-for="(item, index) in buttons"
+        :key="index"
+        @click="toggle(item)"
+        :class="{'__Active': item.active}"
+        :data-label="$t(item.label.default)"
+        :data-label__hover="$t(item.label.hover)"
+        :data-label__active="$t(item.label.active)"
+      >
         <div class="Icon _Icon __default" :class="[item.icon.default]"></div>
         <div class="Icon _Icon __active" :class="[item.icon.active]"></div>
       </button>
