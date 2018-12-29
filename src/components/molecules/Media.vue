@@ -2,14 +2,17 @@
   <div class="Media" :class="{'__Fullscreen': state.fullscreen}">
     <div class="_Container">
       <div class="_Info">
-        <span class="_Item">{{$t(current.type.toUpperCase())}}</span>
+        <span
+          class="_Item"
+          :class="{'__noDot': !(medialist.length > 1)}"
+        >{{$t(current.type.toUpperCase())}}</span>
         <span
           class="_Item __noDot"
           v-if="medialist.length > 1"
         >{{current.__state.index + 1}} / {{medialist.length}}</span>
-        <span class="_Item __navigation __noDot" v-if="medialist.length > 1">
-          <div class="_Icon Icon __back __black" @click="prev()"></div>
-          <div class="_Icon Icon __next __black" @click="next()"></div>
+        <span class="_Item __navigation __noDot">
+          <div class="_Icon Icon __back __black" @click="prev()" v-if="medialist.length > 1"></div>
+          <div class="_Icon Icon __next __black" @click="next()" v-if="medialist.length > 1"></div>
           <div
             class="_Icon Icon __black"
             :class="{'__fullscreenExit': state.fullscreen, '__fullscreen': !state.fullscreen}"
@@ -28,17 +31,18 @@
             <component
               :is="item.type + '-item'"
               :data="item"
-              :navigate="(item.type === 'photo' && medialist.length > 1) ? next : null"
-              :fullscreen="toggleFullscreen"
+              :on-navigate="(item.type === 'photo' && medialist.length > 1) ? next : undefined"
+              :on-fullscreen="toggleFullscreen"
+              :state="state"
             />
           </li>
         </ul>
         <!-- <div class="_Buttons __topLeft">
           <a :href="current.permalink">{{current.permalink}}</a>
-        </div>-->
+        </div>
         <div class="_Buttons __bottomRight" :class="{'__Active': state.fullscreen}">
           <button @click="toggleFullscreen()">Tam Ekran</button>
-        </div>
+        </div>-->
       </div>
     </div>
   </div>
@@ -48,6 +52,8 @@
 import { mapActions, mapGetters, mapMutations, mapState } from "vuex";
 import { TOGGLE_CSS_CLASS } from "@/store/modules/common/types";
 
+import { onImageReady } from "@/helpers/utils.js";
+
 const KEYS = {
   ESC: 27,
   ARROW_LEFT: 37,
@@ -56,12 +62,8 @@ const KEYS = {
   ARROW_DOWN: 40
 };
 let _caches = {
-  keyboard: null,
-  scroll: null,
-  scrollPos: {
-    x: window.scrollX,
-    y: window.scrollY
-  }
+  onKeyup: null,
+  onScroll: null
 };
 
 export default {
@@ -135,11 +137,12 @@ export default {
     next() {
       this.navigate("NEXT");
     },
-    toggleFullscreen() {
+    toggleFullscreen(callback) {
       this.state.fullscreen = !this.state.fullscreen;
-      this[TOGGLE_CSS_CLASS](["__SocialList__Fullscreen"]);
       if (this.state.fullscreen) {
-        _caches.keyboard = e => {
+        _caches.onKeyup = e => {
+          e.preventDefault();
+          e.stopPropagation();
           const key = e.keyCode || e.which;
           switch (key) {
             case KEYS.ESC:
@@ -158,21 +161,21 @@ export default {
               break;
           }
         };
-        _caches.scrollPos = {
-          x: window.scrollX,
-          y: window.scrollY
+        _caches.onScroll = e => {
+          this.toggleFullscreen();
         };
-        _caches.scroll = e => {
-          e.preventDefault();
-          e.stopPropagation();
-          window.scrollTo(_caches.scrollPos.x, _caches.scrollPos.y);
-        };
-        window.addEventListener("scroll", _caches.scroll, false);
-        window.addEventListener("keyup", _caches.keyboard, false);
+        window.addEventListener("scroll", _caches.onScroll, false);
+        window.addEventListener("keyup", _caches.onKeyup, false);
       } else {
-        window.removeEventListener("scroll", _caches.scroll, false);
-        window.removeEventListener("keyup", _caches.keyboard, false);
+        window.removeEventListener("scroll", _caches.onScroll, false);
+        window.removeEventListener("keyup", _caches.onKeyup, false);
       }
+
+      if (callback && callback instanceof Function) {
+        callback(this.state.fullscreen);
+        // this[TOGGLE_CSS_CLASS](["__SocialList__Fullscreen"]);
+      }
+      this[TOGGLE_CSS_CLASS](["__SocialList__Fullscreen"]);
     }
   }
 };
@@ -180,6 +183,11 @@ export default {
 
 <style lang="postcss" scoped>
 @import url("../../styles/variables.css");
+
+/* 
+background: linear-gradient(135deg, rgb(216, 210, 202) 0%, rgb(137, 133, 128) 100%);
+background: linear-gradient(135deg, rgb(201, 201, 201) 0%, rgb(120, 120, 120) 100%);
+ */
 
 .Media {
   --BackgroundColor: var(--DefaultColor);
@@ -204,7 +212,8 @@ export default {
     bottom: 0;
     left: 0;
     z-index: 9999;
-    background-color: color-mod(var(--ColorContrast) a(75%));
+    background-color: var(--Color);
+    color: var(--BackgroundColor);
 
     & > ._Container {
       width: 100%;
@@ -212,22 +221,29 @@ export default {
       position: relative;
       z-index: 1;
 
-      /* margin: 0 auto;
-      padding: 5%; */
+      margin: 0 auto;
+      padding: 5%;
     }
 
     & ._Info {
-      padding: 5rem;
+      padding: 1.5rem;
       position: absolute;
-      top: 0;
-      width: 100%;
+      top: 1rem;
+      right: 1rem;
       z-index: 3;
+
+      & ._Item:not(:last-child) {
+        margin-right: 0.75rem;
+      }
+      & ._Item.__navigation {
+        margin-left: 0.5rem;
+      }
     }
 
     & ._Content {
       width: 100%;
       height: 100%;
-      padding: 10%;
+      /* padding: 5%; */
       margin: 0 auto;
       & > ._List {
         display: flex;

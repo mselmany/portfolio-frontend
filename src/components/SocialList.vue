@@ -75,9 +75,9 @@ export default {
     transform: translateX(0);
   }
 
-  &.__MenuActive {
-  }
+  &.__MenuActive,
   &.__FilterActive {
+    /* filter: blur(3rem); */
   }
 
   & ._SocialItem {

@@ -1,6 +1,11 @@
 <template>
   <div class="Video">
-    <video controls :poster="data.thumbnail" width="100%">
+    <!-- <video controls :poster="data.thumbnail" :style="!state.fullscreen ? '100%' : null"> -->
+    <video
+      controls
+      :poster="data.thumbnail"
+      :style="state.fullscreen ? 'height:100%;' : 'width:100%;'"
+    >
       <source
         v-for="(source, index) in data.srcset"
         :key="index"
@@ -19,9 +24,13 @@ export default {
       type: Object,
       required: true
     },
-    fullscreen: {
+    onFullscreen: {
       type: Function,
       default: _ => {}
+    },
+    state: {
+      type: Object,
+      required: true
     }
   }
 };
@@ -51,6 +60,7 @@ export default {
 
   & video {
     display: block;
+    /* object-fit: scale-down; */
     object-fit: contain;
     overflow: hidden;
   }
