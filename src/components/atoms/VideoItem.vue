@@ -1,11 +1,6 @@
 <template>
   <div class="Video">
-    <!-- <video controls :poster="data.thumbnail" :style="!state.fullscreen ? '100%' : null"> -->
-    <video
-      controls
-      :poster="data.thumbnail"
-      :style="state.fullscreen ? 'height:100%;' : 'width:100%;'"
-    >
+    <video controls :poster="data.thumbnail">
       <source
         v-for="(source, index) in data.srcset"
         :key="index"
@@ -60,7 +55,9 @@ export default {
 
   & video {
     display: block;
-    /* object-fit: scale-down; */
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: scale-down;
     object-fit: contain;
     overflow: hidden;
   }

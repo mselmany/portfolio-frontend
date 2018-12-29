@@ -148,34 +148,3 @@ export function markAsViewed({
     return item;
   });
 }
-
-export function onImageReady(
-  img = error("'image' element is missing!"),
-  fullscreen = error("'fullscreen' state is missing!")
-) {
-  if (!img || !(img instanceof HTMLImageElement)) return;
-
-  const fullSize = () => {
-    let { naturalWidth, naturalHeight } = img,
-      w,
-      h;
-    if (naturalWidth > naturalHeight) {
-      w = 100;
-      h = 100 * (naturalHeight / naturalWidth);
-    } else {
-      w = 100 * (naturalWidth / naturalHeight);
-      h = 100;
-    }
-    img.style.width = `${w}%`;
-    img.style.height = `${h}%`;
-    img.style.minWidth = `${naturalWidth}px`;
-    img.style.minHeight = `${naturalHeight}px`;
-    img.style.objectFit = "initial";
-  };
-
-  if (fullscreen) {
-    img.complete ? fullSize() : (img.onload = fullSize);
-  } else {
-    img.style = null;
-  }
-}

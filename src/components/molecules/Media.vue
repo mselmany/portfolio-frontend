@@ -52,8 +52,6 @@
 import { mapActions, mapGetters, mapMutations, mapState } from "vuex";
 import { TOGGLE_CSS_CLASS } from "@/store/modules/common/types";
 
-import { onImageReady } from "@/helpers/utils.js";
-
 const KEYS = {
   ESC: 27,
   ARROW_LEFT: 37,
@@ -137,8 +135,9 @@ export default {
     next() {
       this.navigate("NEXT");
     },
-    toggleFullscreen(callback) {
+    toggleFullscreen() {
       this.state.fullscreen = !this.state.fullscreen;
+      this[TOGGLE_CSS_CLASS](["__SocialList__Fullscreen"]);
       if (this.state.fullscreen) {
         _caches.onKeyup = e => {
           e.preventDefault();
@@ -170,12 +169,6 @@ export default {
         window.removeEventListener("scroll", _caches.onScroll, false);
         window.removeEventListener("keyup", _caches.onKeyup, false);
       }
-
-      if (callback && callback instanceof Function) {
-        callback(this.state.fullscreen);
-        // this[TOGGLE_CSS_CLASS](["__SocialList__Fullscreen"]);
-      }
-      this[TOGGLE_CSS_CLASS](["__SocialList__Fullscreen"]);
     }
   }
 };
@@ -222,7 +215,7 @@ background: linear-gradient(135deg, rgb(201, 201, 201) 0%, rgb(120, 120, 120) 10
       z-index: 1;
 
       margin: 0 auto;
-      padding: 5%;
+      padding: 1%;
     }
 
     & ._Info {
