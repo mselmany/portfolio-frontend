@@ -27,8 +27,9 @@ export default {
       media: [
         {
           type: "photo",
-          title: this.data.title,
-          src: this.data.images.hidpi
+          alt: this.data.title + "<br/>" + this.data.description,
+          src: this.data.images.hidpi,
+          permalink: this.data.html_url
         }
       ]
     };

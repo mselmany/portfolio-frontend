@@ -66,21 +66,21 @@ export default {
   --Color: var(--DefaultBackgroundColor);
   --Transition: var(--DefaultTransition);
   &.__withMedia {
-    /* background-color: var(--BackgroundColor); */
-    /* color: var(--Color); */
-    /* padding-bottom: 1rem; */
-    /* border-radius: 0.5rem; */
-    /* border: 2px solid color-mod(var(--BackgroundColor) l(+55%)); */
+    /* background-color: var(--BackgroundColor);
+    color: var(--Color);
+    padding: 1rem 0;
+    border-radius: 0.5rem;
+    border: 2px solid color-mod(var(--BackgroundColor) l(+55%)); */
 
     & .Media {
-      /* padding: 1rem 1rem 0 1rem; */
-      /* border-radius: 0.5rem; */
-      /* overflow: hidden; */
+      /* padding: 1rem 1rem 0 1rem;
+      border-radius: 0.5rem;
+      overflow: hidden; */
     }
     & .MetaInfo,
     & ._Title {
-      /* padding: 0 1rem; */
-      /* color: var(--Color); */
+      /* padding: 0 1rem;
+      color: var(--Color); */
     }
   }
 }

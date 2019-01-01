@@ -99,7 +99,7 @@ export default {
     position: absolute;
     top: 75%;
     left: 50%;
-    z-index: 9999;
+    z-index: 100;
     transition: var(--Transition);
     visibility: hidden;
     opacity: 0;

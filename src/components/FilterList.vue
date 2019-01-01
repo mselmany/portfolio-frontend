@@ -177,7 +177,7 @@ export default {
   position: fixed;
   top: 0;
   right: 0;
-  z-index: 1;
+  z-index: 10;
   background: var(--Color);
   color: var(--ColorContrast);
   background: linear-gradient(

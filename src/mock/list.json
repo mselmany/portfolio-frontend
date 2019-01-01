@@ -131,7 +131,25 @@
           "__createdAt": 1541965490883,
           "tweet_url": "https://twitter.com/suspiria1977/status/946553597239746560",
           "text": "Black Mirror: A summary",
-          "media": [
+          "media": [{
+              "id_str": "1058567176590749696",
+              "media_url_https": "https://pbs.twimg.com/ext_tw_video_thumb/1058567176590749696/pu/img/DdZJzikkVtX4fOUx.jpg",
+              "url": "https://t.co/GPDTK5bBde",
+              "display_url": "pic.twitter.com/GPDTK5bBde",
+              "type": "video",
+              "video_info": {
+                "aspect_ratio": [
+                  1,
+                  1
+                ],
+                "duration_millis": 17467,
+                "source": {
+                  "bitrate": 1280000,
+                  "content_type": "video/mp4",
+                  "url": "https://video.twimg.com/ext_tw_video/1058567176590749696/pu/vid/720x720/YzXp7SAgThF6nJn2.mp4?tag=5"
+                }
+              }
+            },
             {
               "id_str": "946553508454572033",
               "media_url_https": "https://pbs.twimg.com/tweet_video_thumb/DSLVZqBVoAEbSEw.jpg",

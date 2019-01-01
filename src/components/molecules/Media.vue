@@ -1,67 +1,66 @@
 <template>
-  <div class="Media" :class="{'__Fullscreen': state.fullscreen}">
-    <div class="_Container">
+  <div
+    class="Media"
+    ref="mediaContainer"
+    :class="{'__Fullscreen': state.fullscreen, '__Sticky': state.sticky}"
+  >
+    <div
+      class="_Placeholder"
+      ref="placeholder"
+      @click="toggleSticky();"
+      :data-text="$t('STICKY_MODE')"
+    ></div>
+    <div class="_Container" ref="sticky">
       <div class="_Info">
+        <span class="_Item __type" :title="$t('PERMALINK')">
+          <a
+            :href="current.permalink"
+            target="_blank"
+            rel="noopener noreferrer"
+          >{{$t(current.type.toUpperCase())}}</a>
+        </span>
         <span
           class="_Item"
-          :class="{'__noDot': !(medialist.length > 1)}"
-        >{{$t(current.type.toUpperCase())}}</span>
-        <span
-          class="_Item __noDot"
           v-if="medialist.length > 1"
         >{{current.__state.index + 1}} / {{medialist.length}}</span>
         <span class="_Item __navigation __noDot">
+          <div
+            class="_Icon Icon __black"
+            :class="current.__state.playing ? '__pause': '__play'"
+            v-if="current.__state.initialized"
+            @click="current.__state.playPause()"
+          ></div>
           <div class="_Icon Icon __back __black" @click="prev()" v-if="medialist.length > 1"></div>
           <div class="_Icon Icon __next __black" @click="next()" v-if="medialist.length > 1"></div>
           <div
             class="_Icon Icon __black"
-            :class="{'__fullscreenExit': state.fullscreen, '__fullscreen': !state.fullscreen}"
+            :class="{'__fullscreenExit2': state.fullscreen, '__fullscreen2': !state.fullscreen}"
             @click="toggleFullscreen()"
           ></div>
         </span>
       </div>
       <div class="_Content">
-        <ul class="_List">
-          <li
-            class="_Item"
-            v-for="(item, index) in medialist"
-            :key="index"
-            :class="{'__Selected': item.__state.selected}"
-          >
-            <component
-              :is="item.type + '-item'"
-              :data="item"
-              :on-navigate="(item.type === 'photo' && medialist.length > 1) ? next : undefined"
-              :on-fullscreen="toggleFullscreen"
-              :state="state"
-            />
-          </li>
-        </ul>
-        <!-- <div class="_Buttons __topLeft">
-          <a :href="current.permalink">{{current.permalink}}</a>
-        </div>
-        <div class="_Buttons __bottomRight" :class="{'__Active': state.fullscreen}">
-          <button @click="toggleFullscreen()">Tam Ekran</button>
-        </div>-->
+        <component
+          :is="current.type + '-item'"
+          :data="current"
+          :state="state"
+          :on-fullscreen="toggleFullscreen"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { mapActions, mapGetters, mapMutations, mapState } from "vuex";
-import { TOGGLE_CSS_CLASS } from "@/store/modules/common/types";
+import { raf, inViewport } from "@/helpers/utils.js";
 
 const KEYS = {
   ESC: 27,
+  SPACE: 32,
   ARROW_LEFT: 37,
   ARROW_UP: 38,
   ARROW_RIGHT: 39,
   ARROW_DOWN: 40
-};
-let _caches = {
-  onKeyup: null,
-  onScroll: null
 };
 
 export default {
@@ -83,7 +82,13 @@ export default {
       })),
       current: null,
       state: {
-        fullscreen: false
+        fullscreen: false,
+        sticky: false
+      },
+      caches: {
+        onKeydown: null,
+        onScroll: null,
+        onSticky: null
       }
     };
   },
@@ -95,6 +100,14 @@ export default {
     NEXT: {
       tr: "Sonraki →",
       en: "Next →"
+    },
+    PERMALINK: {
+      tr: "Kaynak",
+      en: "Source"
+    },
+    STICKY_MODE: {
+      tr: "Sabit modda oynatılıyor...",
+      en: "Playing in sticky mode..."
     },
     PHOTO: {
       tr: "Fotoğraf",
@@ -112,8 +125,47 @@ export default {
   created() {
     this.current = this.medialist[0];
   },
+  watch: {
+    playing() {
+      // console.log("watch");
+      if (this.state.fullscreen) {
+        console.log("0");
+        /* if (this.current.__state.playing) {
+          console.log("-2");
+          this.enableSticky();
+        } else {
+          console.log("-3");
+          this.disableSticky();
+        } */
+        return;
+      }
+      if (this.state.sticky || this.state.fullscreen) {
+        console.log("1");
+        return;
+      }
+
+      if (this.current.__state.playing) {
+        console.log("2");
+        this.enableSticky();
+      } else {
+        console.log("3");
+        this.disableSticky();
+      }
+    }
+  },
+  computed: {
+    // for listen changes
+    playing() {
+      if (
+        this.current &&
+        this.current.__state /* && !this.state.fullscreen */
+      ) {
+        console.log("playing");
+        return this.current.__state.playing;
+      }
+    }
+  },
   methods: {
-    ...mapMutations("common", [TOGGLE_CSS_CLASS]),
     navigate(direction) {
       if (this.medialist.length === 1) return;
       const _limit = this.medialist.length - 1;
@@ -135,39 +187,120 @@ export default {
     next() {
       this.navigate("NEXT");
     },
+    setPlaceholder() {
+      if (!this.state.fullscreen) {
+        const placeholder = this.$refs.placeholder;
+        const sticky = this.$refs.sticky;
+        placeholder.style.width = window.getComputedStyle(sticky).width;
+        placeholder.style.height = window.getComputedStyle(sticky).height;
+      }
+    },
     toggleFullscreen() {
-      this.state.fullscreen = !this.state.fullscreen;
-      this[TOGGLE_CSS_CLASS](["__SocialList__Fullscreen"]);
-      if (this.state.fullscreen) {
-        _caches.onKeyup = e => {
-          e.preventDefault();
-          e.stopPropagation();
-          const key = e.keyCode || e.which;
-          switch (key) {
-            case KEYS.ESC:
-              this.toggleFullscreen();
-              break;
-            case KEYS.ARROW_LEFT:
-            case KEYS.ARROW_UP:
-              this.next();
-              break;
-            case KEYS.ARROW_RIGHT:
-            case KEYS.ARROW_DOWN:
-              this.prev();
-              break;
+      if (!this.state.fullscreen) {
+        // this.setPlaceholder(); // set placeholder size
 
-            default:
-              break;
-          }
-        };
-        _caches.onScroll = e => {
-          this.toggleFullscreen();
-        };
-        window.addEventListener("scroll", _caches.onScroll, false);
-        window.addEventListener("keyup", _caches.onKeyup, false);
+        // for refreshing sticky state
+        // this.disableSticky();
+
+        if (this.current.__state.playing) {
+          console.log("---2");
+          this.enableSticky();
+        } else {
+          console.log("---3");
+          this.disableSticky();
+        }
+
+        // enable fullscreen
+        this.state.fullscreen = true;
+
+        // add listeners if did not attached
+        if (!this.caches.onKeydown) {
+          this.caches.onKeydown = e => {
+            e.preventDefault();
+            const key = e.keyCode || e.which;
+            switch (key) {
+              case KEYS.ESC:
+                this.toggleFullscreen();
+                break;
+              case KEYS.ARROW_LEFT:
+              case KEYS.ARROW_UP:
+                this.prev();
+                break;
+              case KEYS.ARROW_RIGHT:
+              case KEYS.ARROW_DOWN:
+                this.next();
+                break;
+              case KEYS.SPACE:
+                this.current.__state.playPause &&
+                  this.current.__state.playPause();
+                break;
+
+              default:
+                break;
+            }
+          };
+          window.addEventListener("keydown", this.caches.onKeydown, false);
+        }
+
+        if (!this.caches.onScroll) {
+          this.caches.onScroll = e => {
+            this.toggleFullscreen();
+          };
+          window.addEventListener("scroll", this.caches.onScroll, false);
+        }
       } else {
-        window.removeEventListener("scroll", _caches.onScroll, false);
-        window.removeEventListener("keyup", _caches.onKeyup, false);
+        // for refreshing sticky state
+        // this.enableSticky();
+
+        if (this.current.__state.playing) {
+          console.log("---2");
+          this.enableSticky();
+        } else {
+          console.log("---3");
+          this.disableSticky();
+        }
+
+        this.state.fullscreen = false;
+
+        // remove listeners on fullscreen exit
+        if (this.caches.onKeydown) {
+          window.removeEventListener("keydown", this.caches.onKeydown, false);
+          this.caches.onKeydown = null;
+        }
+
+        if (this.caches.onScroll) {
+          window.removeEventListener("scroll", this.caches.onScroll, false);
+          this.caches.onScroll = null;
+        }
+      }
+    },
+    enableSticky() {
+      // console.log("enableSticky");
+      this.setPlaceholder();
+
+      const mediaContainer = this.$refs.mediaContainer;
+
+      if (!this.caches.onSticky) {
+        this.caches.onSticky = () => {
+          // if element in view, sticky will be true else false
+          raf(() => {
+            this.state.sticky = !inViewport(mediaContainer);
+            console.log("stickyy");
+          });
+        };
+
+        this.caches.onSticky();
+
+        window.addEventListener("scroll", this.caches.onSticky, false);
+      }
+    },
+    disableSticky() {
+      // console.log("disableSticky");
+      this.state.sticky = false;
+
+      if (this.caches.onSticky) {
+        window.removeEventListener("scroll", this.caches.onSticky, false);
+        this.caches.onSticky = null;
       }
     }
   }
@@ -193,29 +326,25 @@ background: linear-gradient(135deg, rgb(201, 201, 201) 0%, rgb(120, 120, 120) 10
   height: 100%;
   position: relative;
   font-size: 1rem;
-  transition: 0s;
+  transition: 0s !important;
   user-select: none;
 
   &.__Fullscreen {
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 9999;
-    background-color: var(--Color);
-    color: var(--BackgroundColor);
-
+    & > ._Placeholder {
+      display: block;
+      position: relative !important;
+    }
     & > ._Container {
       width: 100%;
       height: 100%;
-      position: relative;
-      z-index: 1;
-
-      margin: 0 auto;
-      padding: 1%;
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 9999;
+      background-color: var(--Color);
+      color: var(--BackgroundColor);
     }
 
     & ._Info {
@@ -224,31 +353,76 @@ background: linear-gradient(135deg, rgb(201, 201, 201) 0%, rgb(120, 120, 120) 10
       top: 1rem;
       right: 1rem;
       z-index: 3;
+      text-shadow: -1px -1px 15px var(--Color), 1px 1px 15px var(--Color),
+        -1px 1px 15px var(--Color), 1px -1px 15px var(--Color);
 
-      & ._Item:not(:last-child) {
-        margin-right: 0.75rem;
+      & ._Item:not(:first-of-type) {
+        margin-left: 0.75rem;
       }
       & ._Item.__navigation {
-        margin-left: 0.5rem;
+        margin-left: 2.5rem;
       }
     }
 
     & ._Content {
       width: 100%;
       height: 100%;
-      /* padding: 5%; */
       margin: 0 auto;
-      & > ._List {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
+    }
+  }
 
-        & > ._Item.__Selected {
-          width: 100%;
-          height: 100%;
-        }
+  &.__Sticky {
+    & > ._Placeholder {
+      display: block;
+      position: relative !important;
+    }
+    & > ._Container {
+      max-width: 30%;
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 9999;
+      background-color: var(--Color);
+      color: var(--BackgroundColor);
+
+      & ._Info {
+        display: none;
       }
+    }
+  }
+
+  & ._Placeholder {
+    display: none;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+
+    &:before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 2.5rem;
+      bottom: 0;
+      background: color-mod(var(--BackgroundColor) a(0.25));
+      background: url("../../assets/background_patterndot.svg");
+    }
+    &:after {
+      content: attr(data-text);
+      display: inline-block;
+      position: absolute;
+      left: 1.25rem;
+      bottom: 1.25rem;
+      padding: 0 0.3rem;
+      background-color: var(--Color);
+      font-size: 0.8rem;
+      line-height: 1.25rem;
+      font-weight: bold;
+      font-style: italic;
+      /* text-transform: uppercase; */
     }
   }
 
@@ -265,13 +439,28 @@ background: linear-gradient(135deg, rgb(201, 201, 201) 0%, rgb(120, 120, 120) 10
     & > ._Item {
       position: relative;
 
-      &:not(:last-of-type, .__noDot) {
-        margin-right: 0.35rem;
+      &:not(:first-of-type, .__noDot) {
+        margin-left: 0.35rem;
 
-        &:after {
+        &:before {
           content: "•";
-          padding-left: 0.3rem;
+          padding-right: 0.3rem;
         }
+      }
+
+      & a {
+        color: currentColor;
+        text-decoration: none;
+        white-space: nowrap;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
+      &.__type {
+        font-family: "Playfair Display";
+        font-style: italic;
+        font-weight: 600;
       }
 
       &.__navigation {
@@ -305,80 +494,5 @@ background: linear-gradient(135deg, rgb(201, 201, 201) 0%, rgb(120, 120, 120) 10
     display: block;
     position: relative;
   }
-
-  & ._List {
-    list-style: none;
-    display: block;
-    position: relative;
-    z-index: 1;
-    margin: 0;
-    padding: 0;
-    & > ._Item {
-      display: none;
-      margin: 0;
-      padding: 0;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 1;
-
-      &.__Selected {
-        display: block;
-        position: relative;
-        z-index: 2;
-      }
-    }
-  }
-
-  & ._Buttons {
-    position: absolute;
-    z-index: 2;
-    font-weight: 900;
-    font-size: 0.85rem;
-    line-height: 1;
-
-    &.__topLeft {
-      top: var(--ButtonFrame_Padding);
-      left: var(--ButtonFrame_Padding);
-    }
-
-    &.__topRight {
-      top: var(--ButtonFrame_Padding);
-      right: var(--ButtonFrame_Padding);
-    }
-
-    &.__bottomRight {
-      bottom: var(--ButtonFrame_Padding);
-      right: var(--ButtonFrame_Padding);
-    }
-
-    &.__bottomLeft {
-      bottom: var(--ButtonFrame_Padding);
-      left: var(--ButtonFrame_Padding);
-    }
-
-    &.__Active {
-      opacity: 0.5;
-    }
-
-    & > * {
-      display: inline-block;
-      margin: 0.15rem;
-      padding: var(--ButtonFrame_Padding);
-      background-color: var(--BackgroundColor);
-      color: var(--Color);
-      font-weight: 400;
-      cursor: pointer;
-    }
-  }
-}
-</style>
-
-<style lang="postcss">
-@import url("../../styles/variables.css");
-
-.__SocialList__Fullscreen .SocialList {
-  transform: none !important; /* for fullscreen*/
-  transition: 0s !important;
 }
 </style>

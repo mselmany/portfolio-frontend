@@ -148,3 +148,33 @@ export function markAsViewed({
     return item;
   });
 }
+
+export const raf =
+  window.requestAnimationFrame ||
+  window.webkitRequestAnimationFrame ||
+  window.mozRequestAnimationFrame ||
+  function(callback) {
+    window.setTimeout(callback, 1000 / 60);
+  };
+
+export function inViewport(el) {
+  const windowHeight =
+    window.innerHeight || document.documentElement.clientHeight;
+  const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+
+  if (el.clientWidth >= windowWidth || el.clientHeight >= windowHeight) {
+    return false;
+  }
+
+  const rect = el.getBoundingClientRect();
+  const p = v => (v * 33) / 100;
+
+  const vertInView =
+    rect.top /* + p(rect.height) */ >= 0 &&
+    rect.bottom /* - p(rect.height) */ <= windowHeight;
+  const horInView =
+    rect.left /* + p(rect.width) */ >= 0 &&
+    rect.right /* - p(rect.width) */ <= windowWidth;
+
+  return vertInView && horInView;
+}

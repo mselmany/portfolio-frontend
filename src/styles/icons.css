@@ -100,4 +100,19 @@
   &.__fullscreenExit {
     background-image: url("../assets/icon_fullscreen-exit.svg");
   }
+  &.__fullscreen2 {
+    background-image: url("../assets/icon_fullscreen2.svg");
+  }
+  &.__fullscreenExit2 {
+    background-image: url("../assets/icon_fullscreen-exit2.svg");
+  }
+  &.__play {
+    background-image: url("../assets/icon_play.svg");
+  }
+  &.__pause {
+    background-image: url("../assets/icon_pause.svg");
+  }
+  &.__pin {
+    background-image: url("../assets/icon_pin.svg");
+  }
 }

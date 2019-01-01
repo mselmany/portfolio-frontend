@@ -67,12 +67,12 @@ export default {
   position: relative;
   margin: 0 calc(var(--Padding) * 1.5);
   padding: calc(var(--Padding) * 1.5) 1rem var(--Padding) 1rem;
-  /* transition: var(--Transition); */
-  transform: translateX(var(--SidebarMenu_Size));
+  transition: var(--Transition);
+  left: var(--SidebarMenu_Size);
 
   @media (--DesktopSmall) {
     margin: 0 auto;
-    transform: translateX(0);
+    left: 0;
   }
 
   &.__MenuActive,
