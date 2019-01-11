@@ -1,7 +1,12 @@
 <template>
   <div class="Photo">
     <div class="_Content">
-      <img :src="data.src" :alt="data.alt" @click="onFullscreen()">
+      <img
+        :src="data.src"
+        :alt="data.alt"
+        :data-broken="$t('BROKEN_IMAGE')"
+        @click="onFullscreen()"
+      >
       <div class="_Alt">
         <div class="_Text" v-html="data.alt"></div>
       </div>
@@ -25,6 +30,12 @@ export default {
       type: Function,
       default: _ => {}
     }
+  },
+  langs: {
+    BROKEN_IMAGE: {
+      tr: "Görüntü yüklenemedi",
+      en: "Failed to load image"
+    }
   }
 };
 </script>
@@ -35,7 +46,8 @@ export default {
 .Photo {
   --BackgroundColor: var(--DefaultColor);
   --Color: var(--DefaultBackgroundColor);
-  --ColorContrast: var(--DefaultColor);
+  --DotPatternImage: url("../../assets/background_patterndot.svg");
+
   display: block;
   width: 100%;
   height: 100%;
@@ -56,10 +68,46 @@ export default {
       display: block;
       width: 100%;
       height: 100%;
+      position: relative;
       object-fit: contain;
       /* border-radius: 0.25rem; */
       overflow: hidden;
       cursor: zoom-in;
+
+      font-size: 0;
+      line-height: 5rem;
+
+      &:before {
+        content: "";
+        display: block;
+        position: absolute;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--Color);
+        background-image: var(--DotPatternImage);
+      }
+      &:after {
+        content: attr(data-broken);
+        max-width: 70%;
+        display: inline-block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        z-index: 2;
+        transform: translateX(-50%) translateY(-50%);
+        padding: 0 0.3rem;
+        background-color: var(--Color);
+        font-size: 0.8rem;
+        line-height: 1.25rem;
+        /* font-weight: bold; */
+        font-style: italic;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
 
     & ._Alt {
@@ -72,7 +120,6 @@ export default {
       z-index: 3;
       & ._Text {
         padding: 0.75rem;
-        /* background-color: var(--Color); */
         color: var(--BackgroundColor);
         text-shadow: -1px -1px 15px var(--Color), 1px 1px 15px var(--Color),
           -1px 1px 15px var(--Color), 1px -1px 15px var(--Color);

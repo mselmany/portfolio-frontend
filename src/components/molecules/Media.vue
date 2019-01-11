@@ -2,7 +2,7 @@
   <div
     class="Media"
     ref="mediaContainer"
-    :class="{'__Fullscreen': state.fullscreen, '__Sticky': state.sticky}"
+    :class="{'__Fullscreen': state.fullscreen.active, '__Sticky': state.sticky.active,'__Top': state.sticky.direction === 'top', '__Bottom': state.sticky.direction === 'bottom'}"
   >
     <div
       class="_Placeholder"
@@ -10,7 +10,7 @@
       @click="toggleSticky();"
       :data-text="$t('STICKY_MODE')"
     ></div>
-    <div class="_Container" ref="sticky">
+    <div class="_FloatingContainer" ref="sticky">
       <div class="_Info">
         <span class="_Item __type" :title="$t('PERMALINK')">
           <a
@@ -34,7 +34,7 @@
           <div class="_Icon Icon __next __black" @click="next()" v-if="medialist.length > 1"></div>
           <div
             class="_Icon Icon __black"
-            :class="{'__fullscreenExit2': state.fullscreen, '__fullscreen2': !state.fullscreen}"
+            :class="{'__fullscreenExit2': state.fullscreen.active, '__fullscreen2': !state.fullscreen.active}"
             @click="toggleFullscreen()"
           ></div>
         </span>
@@ -45,6 +45,7 @@
           :data="current"
           :state="state"
           :on-fullscreen="toggleFullscreen"
+          :disable-sticky="disableSticky"
         />
       </div>
     </div>
@@ -82,13 +83,19 @@ export default {
       })),
       current: null,
       state: {
-        fullscreen: false,
-        sticky: false
-      },
-      caches: {
-        onKeydown: null,
-        onScroll: null,
-        onSticky: null
+        fullscreen: {
+          active: false,
+          caches: {
+            onKeydown: null,
+            onScroll: null
+          }
+        },
+        sticky: {
+          active: false,
+          caches: {
+            onSticky: null
+          }
+        }
       }
     };
   },
@@ -127,40 +134,22 @@ export default {
   },
   watch: {
     playing() {
-      // console.log("watch");
-      if (this.state.fullscreen) {
-        console.log("0");
-        /* if (this.current.__state.playing) {
-          console.log("-2");
-          this.enableSticky();
-        } else {
-          console.log("-3");
-          this.disableSticky();
-        } */
-        return;
-      }
-      if (this.state.sticky || this.state.fullscreen) {
-        console.log("1");
+      // do not trigger sticky mode if already sticky mode or in fullscreen
+      if (this.state.sticky.active || this.state.fullscreen.active) {
         return;
       }
 
       if (this.current.__state.playing) {
-        console.log("2");
         this.enableSticky();
       } else {
-        console.log("3");
         this.disableSticky();
       }
     }
   },
   computed: {
-    // for listen changes
+    // for listen player state changes
     playing() {
-      if (
-        this.current &&
-        this.current.__state /* && !this.state.fullscreen */
-      ) {
-        console.log("playing");
+      if (this.current && this.current.__state) {
         return this.current.__state.playing;
       }
     }
@@ -188,7 +177,7 @@ export default {
       this.navigate("NEXT");
     },
     setPlaceholder() {
-      if (!this.state.fullscreen) {
+      if (!this.state.fullscreen.active) {
         const placeholder = this.$refs.placeholder;
         const sticky = this.$refs.sticky;
         placeholder.style.width = window.getComputedStyle(sticky).width;
@@ -196,26 +185,13 @@ export default {
       }
     },
     toggleFullscreen() {
-      if (!this.state.fullscreen) {
-        // this.setPlaceholder(); // set placeholder size
-
-        // for refreshing sticky state
-        // this.disableSticky();
-
-        if (this.current.__state.playing) {
-          console.log("---2");
-          this.enableSticky();
-        } else {
-          console.log("---3");
-          this.disableSticky();
-        }
-
-        // enable fullscreen
-        this.state.fullscreen = true;
+      if (!this.state.fullscreen.active) {
+        this.setPlaceholder();
+        this.disableSticky();
 
         // add listeners if did not attached
-        if (!this.caches.onKeydown) {
-          this.caches.onKeydown = e => {
+        if (!this.state.fullscreen.caches.onKeydown) {
+          this.state.fullscreen.caches.onKeydown = e => {
             e.preventDefault();
             const key = e.keyCode || e.which;
             switch (key) {
@@ -239,68 +215,92 @@ export default {
                 break;
             }
           };
-          window.addEventListener("keydown", this.caches.onKeydown, false);
+          window.addEventListener(
+            "keydown",
+            this.state.fullscreen.caches.onKeydown,
+            false
+          );
         }
 
-        if (!this.caches.onScroll) {
-          this.caches.onScroll = e => {
+        if (!this.state.fullscreen.caches.onScroll) {
+          this.state.fullscreen.caches.onScroll = e => {
             this.toggleFullscreen();
           };
-          window.addEventListener("scroll", this.caches.onScroll, false);
+          window.addEventListener(
+            "scroll",
+            this.state.fullscreen.caches.onScroll,
+            false
+          );
         }
+
+        // enable fullscreen
+        this.state.fullscreen.active = true;
       } else {
-        // for refreshing sticky state
-        // this.enableSticky();
-
         if (this.current.__state.playing) {
-          console.log("---2");
           this.enableSticky();
-        } else {
-          console.log("---3");
-          this.disableSticky();
         }
-
-        this.state.fullscreen = false;
 
         // remove listeners on fullscreen exit
-        if (this.caches.onKeydown) {
-          window.removeEventListener("keydown", this.caches.onKeydown, false);
-          this.caches.onKeydown = null;
+        if (this.state.fullscreen.caches.onKeydown) {
+          window.removeEventListener(
+            "keydown",
+            this.state.fullscreen.caches.onKeydown,
+            false
+          );
+          this.state.fullscreen.caches.onKeydown = null;
         }
 
-        if (this.caches.onScroll) {
-          window.removeEventListener("scroll", this.caches.onScroll, false);
-          this.caches.onScroll = null;
+        if (this.state.fullscreen.caches.onScroll) {
+          window.removeEventListener(
+            "scroll",
+            this.state.fullscreen.caches.onScroll,
+            false
+          );
+          this.state.fullscreen.caches.onScroll = null;
         }
+
+        // disable fullscreen
+        this.state.fullscreen.active = false;
       }
     },
     enableSticky() {
-      // console.log("enableSticky");
       this.setPlaceholder();
 
       const mediaContainer = this.$refs.mediaContainer;
 
-      if (!this.caches.onSticky) {
-        this.caches.onSticky = () => {
+      if (!this.state.sticky.caches.onSticky) {
+        this.state.sticky.caches.onSticky = () => {
           // if element in view, sticky will be true else false
           raf(() => {
-            this.state.sticky = !inViewport(mediaContainer);
-            console.log("stickyy");
+            const { inview, direction } = inViewport(mediaContainer);
+            this.state.sticky.active = !inview;
+            this.state.sticky.direction = direction;
           });
         };
 
-        this.caches.onSticky();
+        this.state.sticky.caches.onSticky();
 
-        window.addEventListener("scroll", this.caches.onSticky, false);
+        window.addEventListener(
+          "scroll",
+          this.state.sticky.caches.onSticky,
+          false
+        );
       }
     },
-    disableSticky() {
-      // console.log("disableSticky");
-      this.state.sticky = false;
+    disableSticky(callback) {
+      this.state.sticky.active = false;
 
-      if (this.caches.onSticky) {
-        window.removeEventListener("scroll", this.caches.onSticky, false);
-        this.caches.onSticky = null;
+      if (this.state.sticky.caches.onSticky) {
+        window.removeEventListener(
+          "scroll",
+          this.state.sticky.caches.onSticky,
+          false
+        );
+        this.state.sticky.caches.onSticky = null;
+      }
+
+      if (callback && callback instanceof Function) {
+        callback();
       }
     }
   }
@@ -320,21 +320,24 @@ background: linear-gradient(135deg, rgb(201, 201, 201) 0%, rgb(120, 120, 120) 10
   --Color: var(--DefaultBackgroundColor);
   --ColorContrast: var(--DefaultColor);
   --Transition: var(--DefaultTransition);
-  --ButtonFrame_Padding: 0.35rem;
+  --InfoOffset_Height: 2.5rem;
+  --DotPatternImage: url("../../assets/background_patterndot.svg");
+
   display: block;
   width: 100%;
   height: 100%;
+  margin-top: var(--InfoOffset_Height);
   position: relative;
   font-size: 1rem;
   transition: 0s !important;
   user-select: none;
 
   &.__Fullscreen {
-    & > ._Placeholder {
+    & ._Placeholder {
       display: block;
       position: relative !important;
     }
-    & > ._Container {
+    & ._FloatingContainer {
       width: 100%;
       height: 100%;
       position: fixed;
@@ -348,6 +351,7 @@ background: linear-gradient(135deg, rgb(201, 201, 201) 0%, rgb(120, 120, 120) 10
     }
 
     & ._Info {
+      width: auto;
       padding: 1.5rem;
       position: absolute;
       top: 1rem;
@@ -372,14 +376,13 @@ background: linear-gradient(135deg, rgb(201, 201, 201) 0%, rgb(120, 120, 120) 10
   }
 
   &.__Sticky {
-    & > ._Placeholder {
+    & ._Placeholder {
       display: block;
       position: relative !important;
     }
-    & > ._Container {
-      max-width: 30%;
+    & ._FloatingContainer {
+      max-width: 25%;
       position: fixed;
-      top: 1rem;
       right: 1rem;
       z-index: 9999;
       background-color: var(--Color);
@@ -388,6 +391,17 @@ background: linear-gradient(135deg, rgb(201, 201, 201) 0%, rgb(120, 120, 120) 10
       & ._Info {
         display: none;
       }
+    }
+    &.__Top ._FloatingContainer {
+      top: 1rem;
+    }
+    &.__Bottom ._FloatingContainer {
+      bottom: 1rem;
+    }
+
+    &.__Top ._Placeholder:after {
+    }
+    &.__Bottom ._Placeholder:after {
     }
   }
 
@@ -405,36 +419,45 @@ background: linear-gradient(135deg, rgb(201, 201, 201) 0%, rgb(120, 120, 120) 10
       position: absolute;
       left: 0;
       right: 0;
-      top: 2.5rem;
+      top: 0;
       bottom: 0;
       background: color-mod(var(--BackgroundColor) a(0.25));
-      background: url("../../assets/background_patterndot.svg");
+      background: var(--DotPatternImage);
     }
     &:after {
       content: attr(data-text);
       display: inline-block;
       position: absolute;
-      left: 1.25rem;
-      bottom: 1.25rem;
+      top: 50%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-50%);
       padding: 0 0.3rem;
       background-color: var(--Color);
       font-size: 0.8rem;
       line-height: 1.25rem;
-      font-weight: bold;
+      /* font-weight: bold; */
       font-style: italic;
       /* text-transform: uppercase; */
     }
   }
 
+  & ._FloatingContainer {
+    display: block;
+    position: relative;
+    z-index: 1;
+  }
+
   & ._Info {
     display: flex;
-    position: relative;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
+    width: 100%;
+    padding-top: 0.75rem; /* --InfoOffset_Height depends this*/
+    padding-bottom: 0.75rem; /* --InfoOffset_Height depends this*/
+    line-height: 1rem; /* --InfoOffset_Height depends this*/
+    position: absolute;
+    top: calc(var(--InfoOffset_Height) * -1);
     overflow: hidden;
     font-weight: 900;
     font-size: 0.85rem;
-    line-height: 1rem;
 
     & > ._Item {
       position: relative;

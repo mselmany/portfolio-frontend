@@ -1,7 +1,7 @@
 <template>
   <div class="Video">
     <figure>
-      <video ref="video" controls preload="metadata" :poster="data.thumbnail">
+      <video ref="video" preload="metadata" :poster="data.thumbnail">
         <source
           v-for="(source, index) in data.srcset"
           :key="index"
@@ -9,37 +9,41 @@
           :type="source.type"
         >
       </video>
-      <div class="_PlayPauseArea" @click="playPause()"></div>
       <div class="_Controls">
         <div class="_Layer __topLeft">
-          <div v-if="state.sticky" class="_Item __Hover" @click="stopSticky()">
+          <div v-if="state.sticky.active" class="_Item __Hover" @click="disableStickyAndScroll()">
             <div class="_Icon Icon __white __pin"></div>
+          </div>
+          <div
+            v-if="state.sticky.active || state.fullscreen.active"
+            class="_Item __Hover"
+            @click="disableStickyAndPause()"
+          >
+            <div class="_Icon Icon __white __close2"></div>
           </div>
         </div>
         <div class="_Layer __topRight">
-          <div class="_Item" @click="playPause()">
+          <div class="_Item" :class="{'__Hover': data.__state.playing}" @click="playPause()">
             <div
               class="_Icon Icon __white"
-              :class="{'__play': !data.__state.playing, '__pause': data.__state.playing}"
+              :class="{'__play': !data.__state.playing && data.__state.percentage !== 100, '__reload': data.__state.percentage === 100, '__pause': data.__state.playing}"
+            ></div>
+          </div>
+          <div class="_Item" :class="{'__Hover': !data.__state.muted}" @click="toggleVolume()">
+            <div
+              class="_Icon Icon __white"
+              :class="{'__volumeOff': data.__state.muted, '__volumeOnZero': !data.__state.muted && data.__state.volume == 0, '__volumeOnHalf': !data.__state.muted && data.__state.volume > 0 && data.__state.volume < 0.5, '__volumeOn': !data.__state.muted && data.__state.volume >= 0.5}"
             ></div>
           </div>
         </div>
-        <!-- <div class="_Layer __bottomRight __Hover">
-          <div class="_Item">
-            <div class="_Icon Icon __white __next"></div>
-          </div>
-          <div class="_Item">
-            <div class="_Icon Icon __white __next"></div>
+      </div>
+      <div class="_PlayPauseArea" @click="playPause()"></div>
+      <div class="_Player">
+        <div class="_ProgressBar" ref="progressBar">
+          <div class="_Progress">
+            <div class="_Indicator" :style="{'width': data.__state.percentage + '%'}"></div>
           </div>
         </div>
-        <div class="_Layer __bottomLeft">
-          <div class="_Item">
-            <div class="_Icon Icon __white __next"></div>
-          </div>
-          <div class="_Item">
-            <div class="_Icon Icon __white __next"></div>
-          </div>
-        </div>-->
       </div>
     </figure>
   </div>
@@ -60,9 +64,16 @@ export default {
     onFullscreen: {
       type: Function,
       default: _ => {}
+    },
+    disableSticky: {
+      type: Function,
+      default: _ => {}
     }
   },
   mounted() {
+    const video = this.$refs.video;
+    const progressBar = this.$refs.progressBar;
+
     if (!this.data.__state.hasOwnProperty("initialized")) {
       this.data.__state = {
         ...this.data.__state,
@@ -71,15 +82,21 @@ export default {
         duration: -1,
         currentTime: 0,
         percentage: 0,
-        sound: 0.3
+        volume: video.volume,
+        muted: video.muted
       };
     }
     this.data.__state.playPause = this.playPause;
 
-    const video = this.$refs.video;
     video.addEventListener("loadedmetadata", () => {
       this.data.__state.duration = video.duration;
     });
+
+    video.addEventListener("volumechange", () => {
+      this.data.__state.volume = video.volume;
+      this.data.__state.muted = video.muted;
+    });
+
     video.addEventListener("timeupdate", () => {
       if (this.data.__state.duration === -1) {
         this.data.__state.duration = video.duration;
@@ -89,8 +106,15 @@ export default {
         (video.currentTime / video.duration) * 100
       );
       this.data.__state.playing = !(video.paused || video.ended);
-      // console.log(">> ", this.data.__state.playing);
     });
+
+    progressBar.addEventListener("click", function(e) {
+      var pos =
+        (e.pageX - this.getBoundingClientRect().left) / this.offsetWidth;
+      video.currentTime = pos * video.duration;
+    });
+
+    // TODO@3: Progressbar mouse sürükle-bırak ile ileri-geri sarılabilmeli.
   },
   beforeDestroy() {
     this.pause();
@@ -105,16 +129,35 @@ export default {
       }
     },
     play() {
-      this.$refs.video.play();
       this.data.__state.playing = true;
+      this.$refs.video.play();
     },
     pause() {
-      this.$refs.video.pause();
       this.data.__state.playing = false;
+      this.$refs.video.pause();
     },
-    stopSticky() {
-      this.state.sticky = false;
+    toggleVolume() {
+      const video = this.$refs.video;
+      video.muted = !video.muted;
+    },
+    disableStickyAndScroll() {
+      this.disableSticky(() => {
+        setTimeout(() => {
+          this.$el.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+          });
+        });
+      });
+    },
+    disableStickyAndPause() {
       this.pause();
+      if (this.state.fullscreen.active) {
+        this.onFullscreen();
+      }
+      if (this.state.sticky.active) {
+        this.disableSticky();
+      }
     }
   }
 };
@@ -126,7 +169,13 @@ export default {
 .Video {
   --BackgroundColor: var(--DefaultColor);
   --Color: var(--DefaultBackgroundColor);
-  --BorderColor: var(--BackgroundColor);
+  --Transition: var(--DefaultTransition);
+
+  --PlayerHeight: 2.5rem;
+  --ProgressSize: 0.2rem;
+  --ProgressBarColor: #cd201f;
+  --ProgressBarBgColor: var(--DefaultColor);
+
   display: block;
   width: 100%;
   height: 100%;
@@ -134,18 +183,16 @@ export default {
   position: relative;
   margin: 0;
   padding: 0;
-  /* border-radius: 0.25rem; */
-  /* overflow: hidden; */
 
   display: flex;
   justify-content: center;
   align-items: center;
 
   & .__Hover,
-  &:hover .__NotHover {
+  & figure:hover .__NotHover {
     display: none !important;
   }
-  &:hover .__Hover {
+  & figure:hover .__Hover {
     display: block !important;
     &._Layer {
       display: flex !important;
@@ -171,17 +218,6 @@ export default {
     overflow: hidden;
   }
 
-  & ._PlayPauseArea {
-    width: 100%;
-    height: calc(100% - 4rem);
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 1;
-    cursor: pointer;
-    /* background-color: red;
-    bottom: 0; */
-  }
   & ._Controls {
     width: 1px;
     height: 0;
@@ -231,6 +267,96 @@ export default {
       border: 0.3rem solid;
       & ._Icon {
         background-size: contain;
+      }
+    }
+  }
+  & ._PlayPauseArea {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    cursor: pointer;
+  }
+  & ._Player {
+    height: var(--PlayerHeight);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    transition: var(--Transition);
+
+    & ._ProgressBar {
+      width: auto;
+      height: 100%;
+      display: block;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      transition: var(--Transition);
+      cursor: pointer;
+
+      & ._Progress {
+        width: auto;
+        height: calc(var(--ProgressSize) / 2);
+        min-height: 2px;
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--ProgressBarBgColor);
+        transition: inherit;
+        cursor: pointer;
+
+        & ._Indicator {
+          height: 100%;
+          display: block;
+          position: relative;
+          background-color: var(--ProgressBarColor);
+
+          &:after {
+            content: "";
+            box-sizing: initial;
+            width: var(--ProgressSize);
+            height: var(--ProgressSize);
+            position: absolute;
+            top: -0.3rem;
+            right: calc(((var(--ProgressSize) / 2) + 0.3rem) * -1);
+            border: 0.3rem solid currentColor;
+            background-color: var(--Color);
+            color: var(--Color);
+            box-shadow: 0 0 calc(var(--ProgressSize) / 2)
+              color-mod(var(--BackgroundColor) a(25%));
+            border-radius: 50%;
+            transition: var(--Transition);
+            transform: scale(0.5);
+            visibility: hidden;
+          }
+        }
+      }
+    }
+  }
+
+  & figure:hover {
+    & ._Player {
+      left: 1rem;
+      right: 1rem;
+
+      & ._Progress {
+        height: var(--ProgressSize);
+        bottom: 1rem;
+
+        & ._Indicator:after {
+          visibility: visible;
+        }
+      }
+
+      &:hover ._Indicator:after {
+        transform: scale(1);
       }
     }
   }

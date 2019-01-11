@@ -162,19 +162,38 @@ export function inViewport(el) {
     window.innerHeight || document.documentElement.clientHeight;
   const windowWidth = window.innerWidth || document.documentElement.clientWidth;
 
+  // if element is not smaller than window size
   if (el.clientWidth >= windowWidth || el.clientHeight >= windowHeight) {
     return false;
   }
 
   const rect = el.getBoundingClientRect();
-  const p = v => (v * 33) / 100;
+  // const p = v => (v * 33) / 100;
 
+  // is element in vertical view
   const vertInView =
     rect.top /* + p(rect.height) */ >= 0 &&
     rect.bottom /* - p(rect.height) */ <= windowHeight;
+
+  // is element in horizontal view
   const horInView =
     rect.left /* + p(rect.width) */ >= 0 &&
     rect.right /* - p(rect.width) */ <= windowWidth;
 
-  return vertInView && horInView;
+  // detect offset direction (for placing floated element)
+  let direction = "";
+
+  if (rect.top <= 0) {
+    direction += "top";
+  } else if (rect.bottom >= windowHeight) {
+    direction += "bottom";
+  }
+
+  if (rect.left <= 0) {
+    direction += "left";
+  } else if (rect.right >= windowWidth) {
+    direction += "right";
+  }
+
+  return { inview: vertInView && horInView, direction };
 }

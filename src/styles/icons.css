@@ -112,7 +112,25 @@
   &.__pause {
     background-image: url("../assets/icon_pause.svg");
   }
+  &.__reload {
+    background-image: url("../assets/icon_reload.svg");
+  }
   &.__pin {
     background-image: url("../assets/icon_pin.svg");
+  }
+  &.__volumeOn {
+    background-image: url("../assets/icon_volume-on.svg");
+  }
+  &.__volumeOnZero {
+    background-image: url("../assets/icon_volume-on_zero.svg");
+  }
+  &.__volumeOnHalf {
+    background-image: url("../assets/icon_volume-on_half.svg");
+  }
+  &.__volumeOff {
+    background-image: url("../assets/icon_volume-off.svg");
+  }
+  &.__close2 {
+    background-image: url("../assets/icon_close2.svg");
   }
 }
