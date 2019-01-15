@@ -29,19 +29,24 @@
               :class="{'__play': !data.__state.playing && data.__state.percentage !== 100, '__reload': data.__state.percentage === 100, '__pause': data.__state.playing}"
             ></div>
           </div>
-          <div class="_Item" :class="{'__Hover': !data.__state.muted}" @click="toggleVolume()">
+          <div class="_Item" :class="{'__Hover': !data.__state.muted}" @click="changeVolume()">
             <div
               class="_Icon Icon __white"
-              :class="{'__volumeOff': data.__state.muted, '__volumeOnZero': !data.__state.muted && data.__state.volume == 0, '__volumeOnHalf': !data.__state.muted && data.__state.volume > 0 && data.__state.volume < 0.5, '__volumeOn': !data.__state.muted && data.__state.volume >= 0.5}"
+              :class="{'__volumeOff': data.__state.muted, '__volumeOnZero': !data.__state.muted && data.__state.volume == 0, '__volumeOnHalf': !data.__state.muted && data.__state.volume > 0 && data.__state.volume <= 0.5, '__volumeOn': !data.__state.muted && data.__state.volume > 0.5}"
             ></div>
           </div>
         </div>
       </div>
       <div class="_PlayPauseArea" @click="playPause()"></div>
       <div class="_Player">
-        <div class="_ProgressBar" ref="progressBar">
-          <div class="_Progress">
-            <div class="_Indicator" :style="{'width': data.__state.percentage + '%'}"></div>
+        <div class="_Container">
+          <div class="_Panel">
+            <div class="_Item">{{formattedCurrentTime}} ∙ {{formattedDuration}}</div>
+          </div>
+          <div class="_ProgressBar" ref="progressBar">
+            <div class="_Progress">
+              <div class="_Indicator" :style="{'width': data.__state.percentage + '%'}"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -50,6 +55,8 @@
 </template>
 
 <script>
+import { formatTime } from "@/helpers/utils";
+
 export default {
   name: "VideoItem",
   props: {
@@ -71,8 +78,8 @@ export default {
     }
   },
   mounted() {
-    const video = this.$refs.video;
-    const progressBar = this.$refs.progressBar;
+    const video = this.$refs.video,
+      progressBar = this.$refs.progressBar;
 
     if (!this.data.__state.hasOwnProperty("initialized")) {
       this.data.__state = {
@@ -89,35 +96,45 @@ export default {
     this.data.__state.playPause = this.playPause;
 
     video.addEventListener("loadedmetadata", () => {
-      this.data.__state.duration = video.duration;
+      let { duration } = video;
+      this.data.__state.duration = duration;
     });
 
     video.addEventListener("volumechange", () => {
-      this.data.__state.volume = video.volume;
-      this.data.__state.muted = video.muted;
+      let { volume, muted } = video;
+      this.data.__state.volume = volume;
+      this.data.__state.muted = muted;
     });
 
     video.addEventListener("timeupdate", () => {
+      let { duration, currentTime, paused, ended } = video;
       if (this.data.__state.duration === -1) {
-        this.data.__state.duration = video.duration;
+        this.data.__state.duration = duration;
       }
-      this.data.__state.currentTime = video.currentTime;
-      this.data.__state.percentage = Math.floor(
-        (video.currentTime / video.duration) * 100
-      );
-      this.data.__state.playing = !(video.paused || video.ended);
+      this.data.__state.currentTime = currentTime;
+      this.data.__state.percentage = Math.floor((currentTime / duration) * 100);
+      this.data.__state.playing = !(paused || ended);
     });
 
     progressBar.addEventListener("click", function(e) {
-      var pos =
+      const pos =
         (e.pageX - this.getBoundingClientRect().left) / this.offsetWidth;
       video.currentTime = pos * video.duration;
     });
 
     // TODO@3: Progressbar mouse sürükle-bırak ile ileri-geri sarılabilmeli.
+    // TODO@3: Float/pin halindeki mediayı(video) resize edilebilir yap.
   },
   beforeDestroy() {
     this.pause();
+  },
+  computed: {
+    formattedCurrentTime() {
+      return formatTime(this.data.__state.currentTime);
+    },
+    formattedDuration() {
+      return formatTime(this.data.__state.duration);
+    }
   },
   methods: {
     playPause() {
@@ -136,9 +153,16 @@ export default {
       this.data.__state.playing = false;
       this.$refs.video.pause();
     },
-    toggleVolume() {
+    changeVolume() {
       const video = this.$refs.video;
-      video.muted = !video.muted;
+      if (video.muted) {
+        video.muted = false;
+      } else if (video.volume <= 0.5) {
+        video.volume = 1;
+      } else if (!video.muted) {
+        video.muted = true;
+        video.volume = 0.5;
+      }
     },
     disableStickyAndScroll() {
       this.disableSticky(() => {
@@ -171,10 +195,10 @@ export default {
   --Color: var(--DefaultBackgroundColor);
   --Transition: var(--DefaultTransition);
 
-  --PlayerHeight: 2.5rem;
-  --ProgressSize: 0.2rem;
-  --ProgressBarColor: #cd201f;
-  --ProgressBarBgColor: var(--DefaultColor);
+  --ProgressBarHeight: 2rem;
+  --ProgressHeight: 0.2rem;
+  --ProgressColor: #cd201f;
+  --ProgressBgColor: var(--DefaultColor);
 
   display: block;
   width: 100%;
@@ -280,35 +304,48 @@ export default {
     cursor: pointer;
   }
   & ._Player {
-    height: var(--PlayerHeight);
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
     z-index: 2;
-    transition: var(--Transition);
+
+    & ._Container {
+      width: auto;
+      position: relative;
+      transition: var(--Transition);
+    }
+
+    & ._Panel {
+      width: 100%;
+      position: relative;
+      z-index: 2;
+      padding: 0 1rem;
+      font-size: 0.8rem;
+      line-height: 1rem;
+      color: var(--BackgroundColor);
+      transition: var(--Transition);
+      opacity: 0;
+      visibility: hidden;
+    }
 
     & ._ProgressBar {
-      width: auto;
-      height: 100%;
+      width: 100%;
+      height: 1rem;
       display: block;
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
       transition: var(--Transition);
       cursor: pointer;
 
       & ._Progress {
         width: auto;
-        height: calc(var(--ProgressSize) / 2);
+        height: calc(var(--ProgressHeight) / 2);
         min-height: 2px;
         display: block;
         position: absolute;
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: var(--ProgressBarBgColor);
+        background-color: var(--ProgressBgColor);
         transition: inherit;
         cursor: pointer;
 
@@ -316,20 +353,20 @@ export default {
           height: 100%;
           display: block;
           position: relative;
-          background-color: var(--ProgressBarColor);
+          background-color: var(--ProgressColor);
 
           &:after {
             content: "";
             box-sizing: initial;
-            width: var(--ProgressSize);
-            height: var(--ProgressSize);
+            width: var(--ProgressHeight);
+            height: var(--ProgressHeight);
             position: absolute;
             top: -0.3rem;
-            right: calc(((var(--ProgressSize) / 2) + 0.3rem) * -1);
+            right: calc(((var(--ProgressHeight) / 2) + 0.3rem) * -1);
             border: 0.3rem solid currentColor;
             background-color: var(--Color);
             color: var(--Color);
-            box-shadow: 0 0 calc(var(--ProgressSize) / 2)
+            box-shadow: 0 0 calc(var(--ProgressHeight) / 2)
               color-mod(var(--BackgroundColor) a(25%));
             border-radius: 50%;
             transition: var(--Transition);
@@ -343,20 +380,31 @@ export default {
 
   & figure:hover {
     & ._Player {
-      left: 1rem;
-      right: 1rem;
-
-      & ._Progress {
-        height: var(--ProgressSize);
-        bottom: 1rem;
-
-        & ._Indicator:after {
-          visibility: visible;
-        }
+      & ._Container {
+        margin: 0 1rem;
       }
 
-      &:hover ._Indicator:after {
-        transform: scale(1);
+      & ._Panel {
+        padding: 0;
+        opacity: 1;
+        visibility: visible;
+      }
+
+      & ._ProgressBar {
+        height: var(--ProgressBarHeight);
+
+        &:hover ._Indicator:after {
+          transform: scale(1);
+        }
+
+        & ._Progress {
+          height: var(--ProgressHeight);
+          bottom: calc(1rem - (var(--ProgressHeight) / 2));
+
+          & ._Indicator:after {
+            visibility: visible;
+          }
+        }
       }
     }
   }

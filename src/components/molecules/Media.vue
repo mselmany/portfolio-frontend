@@ -7,7 +7,7 @@
     <div
       class="_Placeholder"
       ref="placeholder"
-      @click="toggleSticky();"
+      @click="disableSticky();"
       :data-text="$t('STICKY_MODE')"
     ></div>
     <div class="_FloatingContainer" ref="sticky">
@@ -100,14 +100,6 @@ export default {
     };
   },
   langs: {
-    PREV: {
-      tr: "← Önceki",
-      en: "← Previous"
-    },
-    NEXT: {
-      tr: "Sonraki →",
-      en: "Next →"
-    },
     PERMALINK: {
       tr: "Kaynak",
       en: "Source"

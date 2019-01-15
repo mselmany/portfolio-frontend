@@ -197,3 +197,29 @@ export function inViewport(el) {
 
   return { inview: vertInView && horInView, direction };
 }
+
+export function formatTime(time) {
+  if (!parseInt(time)) return "00:00";
+
+  let hours = parseInt(time / 3600, 10);
+  let minutes = parseInt((time / 60) % 60, 10);
+  let seconds = parseInt(time % 60, 10);
+
+  if (!hours) {
+    hours = "";
+  } else if (hours < 10) {
+    hours = "0" + hours + ":";
+  } else {
+    hours = hours + ":";
+  }
+
+  if (minutes < 10) {
+    minutes = "0" + minutes;
+  }
+
+  if (seconds < 10) {
+    seconds = "0" + seconds;
+  }
+
+  return `${hours}${minutes}:${seconds}`;
+}
