@@ -169,7 +169,8 @@ export default {
         setTimeout(() => {
           this.$el.scrollIntoView({
             behavior: "smooth",
-            block: "center"
+            block: "center",
+            inline: "center"
           });
         });
       });
