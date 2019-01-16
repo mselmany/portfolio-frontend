@@ -4,10 +4,10 @@
   "description": "A portfolio app integrated with social media accounts, resumes, built-in articles and comments...",
   "author": "numano <mselmany@hotmail.com>",
   "license": "MIT",
-  "homepage": "https://bitbucket.org/mselmany/portfolio-frontend#readme",
+  "homepage": "https://github.com/mselmany/portfolio-frontend",
   "repository": {
     "type": "git",
-    "url": "git+https://mselmany@bitbucket.org/mselmany/portfolio-frontend.git"
+    "url": "git+https://github.com/mselmany/portfolio-frontend.git"
   },
   "keywords": [
     "frontend",
