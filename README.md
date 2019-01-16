@@ -1,6 +1,6 @@
 # portfolio-frontend
 
-> A portfolio app integrated with social media accounts, resumes, built-ibnarticles and comments... (see backend project: https://bitbucket.org/mselmany/portfolio-backend)
+> A portfolio app integrated with social media accounts, resumes, built-in articles and comments... (see backend project: https://github.com/mselmany/portfolio-backend)
 
 ## Build Setup
 
