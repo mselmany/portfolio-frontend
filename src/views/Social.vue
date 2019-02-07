@@ -3,7 +3,7 @@
     <FilterList/>
     <SocialList v-infinite-loader="loader"/>
     <!-- <SocialList/> -->
-    <LoaderButton :action="loader" :limit="1">YÃ¼kle</LoaderButton>
+    <LoaderButton :action="loader" :limit="1">Yükle</LoaderButton>
   </div>
 </template>
 

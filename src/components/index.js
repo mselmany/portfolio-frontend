@@ -5,6 +5,7 @@ import molecules from "./molecules";
 
 import Dribbble from "./Dribbble";
 import Twitter from "./Twitter";
+import Soundcloud from "./Soundcloud";
 
 import Toolbox from "./Toolbox";
 import SidebarMenu from "./SidebarMenu";
@@ -16,7 +17,8 @@ import InfiniteLoader from "./InfiniteLoader";
 
 const socialitems = {
   Dribbble,
-  Twitter
+  Twitter,
+  Soundcloud
 };
 
 const components = {

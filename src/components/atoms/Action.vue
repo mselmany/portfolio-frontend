@@ -27,6 +27,10 @@ export default {
     TWITTER_TIMELINE: {
       tr: " öttürdü",
       en: "tweeted "
+    },
+    SOUNDCLOUD_FAVORITES: {
+      tr: " beğendi",
+      en: "liked "
     }
   },
   methods: {

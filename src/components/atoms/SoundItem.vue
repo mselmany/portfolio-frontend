@@ -1,55 +1,7 @@
 <template>
-  <div class="Video">
+  <div class="Sound">
     <figure>
-      <video ref="video" preload="metadata" :poster="data.thumbnail">
-        <source
-          v-for="(source, index) in data.srcset"
-          :key="index"
-          :src="source.src"
-          :type="source.type"
-        >
-      </video>
-      <div class="_Controls">
-        <div class="_Layer __topLeft">
-          <div v-if="state.sticky.active" class="_Item __Hover" @click="disableStickyAndScroll()">
-            <div class="_Icon Icon __white __pin"></div>
-          </div>
-          <div
-            v-if="state.sticky.active || state.fullscreen.active"
-            class="_Item __Hover"
-            @click="disableStickyAndPause()"
-          >
-            <div class="_Icon Icon __white __close2"></div>
-          </div>
-        </div>
-        <div class="_Layer __topRight">
-          <div class="_Item" :class="{'__Hover': data.__state.playing}" @click="playPause()">
-            <div
-              class="_Icon Icon __white"
-              :class="{'__play': !data.__state.playing && data.__state.percentage !== 100, '__reload': data.__state.percentage === 100, '__pause': data.__state.playing}"
-            ></div>
-          </div>
-          <div class="_Item" :class="{'__Hover': !data.__state.muted}" @click="changeVolume()">
-            <div
-              class="_Icon Icon __white"
-              :class="{'__volumeOff': data.__state.muted, '__volumeOnZero': !data.__state.muted && data.__state.volume == 0, '__volumeOnHalf': !data.__state.muted && data.__state.volume > 0 && data.__state.volume <= 0.5, '__volumeOn': !data.__state.muted && data.__state.volume > 0.5}"
-            ></div>
-          </div>
-        </div>
-      </div>
-      <div class="_PlayPauseArea" @click="playPause()"></div>
-      <div class="_Player">
-        <div class="_Container">
-          <div class="_Panel">
-            <div class="_Item">{{formattedCurrentTime}} ∙ {{formattedDuration}}</div>
-          </div>
-          <div class="_ProgressBar" ref="progressBar">
-            <div class="_Progress">
-              <div class="_Indicator" :style="{'width': data.__state.percentage + '%'}"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <audio controls :src="data.src"></audio>
     </figure>
   </div>
 </template>
@@ -66,132 +18,24 @@ export default {
     },
     state: {
       type: Object,
-      required: true
-    },
-    onFullscreen: {
-      type: Function,
-      default: _ => {}
+      required: false
     },
     disableSticky: {
       type: Function,
       default: _ => {}
     }
   },
-  mounted() {
-    const video = this.$refs.video,
-      progressBar = this.$refs.progressBar;
-
-    if (!this.data.__state.hasOwnProperty("initialized")) {
-      this.data.__state = {
-        ...this.data.__state,
-        initialized: true,
-        playing: false,
-        duration: -1,
-        currentTime: 0,
-        percentage: 0,
-        volume: video.volume,
-        muted: video.muted
-      };
-    }
-    this.data.__state.playPause = this.playPause;
-
-    video.addEventListener("loadedmetadata", () => {
-      let { duration } = video;
-      this.data.__state.duration = duration;
-    });
-
-    video.addEventListener("volumechange", () => {
-      let { volume, muted } = video;
-      this.data.__state.volume = volume;
-      this.data.__state.muted = muted;
-    });
-
-    video.addEventListener("timeupdate", () => {
-      let { duration, currentTime, paused, ended } = video;
-      if (this.data.__state.duration === -1) {
-        this.data.__state.duration = duration;
-      }
-      this.data.__state.currentTime = currentTime;
-      this.data.__state.percentage = Math.floor((currentTime / duration) * 100);
-      this.data.__state.playing = !(paused || ended);
-    });
-
-    progressBar.addEventListener("click", function(e) {
-      const pos =
-        (e.pageX - this.getBoundingClientRect().left) / this.offsetWidth;
-      video.currentTime = pos * video.duration;
-    });
-
-    // TODO@3: Progressbar mouse sürükle-bırak ile ileri-geri sarılabilmeli.
-    // TODO@3: Float/pin halindeki mediayı(video) resize edilebilir yap.
-  },
-  beforeDestroy() {
-    this.pause();
-  },
-  computed: {
-    formattedCurrentTime() {
-      return formatTime(this.data.__state.currentTime);
-    },
-    formattedDuration() {
-      return formatTime(this.data.__state.duration);
-    }
-  },
-  methods: {
-    playPause() {
-      const video = this.$refs.video;
-      if (video.paused || video.ended) {
-        this.play();
-      } else {
-        this.pause();
-      }
-    },
-    play() {
-      this.data.__state.playing = true;
-      this.$refs.video.play();
-    },
-    pause() {
-      this.data.__state.playing = false;
-      this.$refs.video.pause();
-    },
-    changeVolume() {
-      const video = this.$refs.video;
-      if (video.muted) {
-        video.muted = false;
-      } else if (video.volume <= 0.5) {
-        video.volume = 1;
-      } else if (!video.muted) {
-        video.muted = true;
-        video.volume = 0.5;
-      }
-    },
-    disableStickyAndScroll() {
-      this.disableSticky(() => {
-        setTimeout(() => {
-          this.$el.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-            inline: "center"
-          });
-        });
-      });
-    },
-    disableStickyAndPause() {
-      this.pause();
-      if (this.state.fullscreen.active) {
-        this.onFullscreen();
-      }
-      if (this.state.sticky.active) {
-        this.disableSticky();
-      }
-    }
-  }
+  mounted() {},
+  beforeDestroy() {},
+  computed: {},
+  methods: {}
 };
 </script>
 
 <style lang="postcss" scoped>
 @import url("../../styles/variables.css");
 
-.Video {
+.Sound {
   --BackgroundColor: var(--DefaultColor);
   --Color: var(--DefaultBackgroundColor);
   --Transition: var(--DefaultTransition);

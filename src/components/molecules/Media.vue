@@ -55,6 +55,8 @@
 <script>
 import { raf, inViewport } from "@/helpers/utils.js";
 
+// ! TODO@5: Media daki sticky ve fullscreen işlevlerini directive yap en küçük birimlere ayır...
+
 const KEYS = {
   ESC: 27,
   SPACE: 32,
