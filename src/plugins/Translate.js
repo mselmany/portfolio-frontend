@@ -1,4 +1,4 @@
-/* 
+/*
 const langs = {
     LABEL: {
       tr: "'$2 $1 @FROM $0' cümlesi.",
