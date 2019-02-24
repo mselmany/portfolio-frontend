@@ -58,6 +58,7 @@ export default {
       }
 
       async function loader() {
+        // ! TODO@5: raf() metodunu kullan
         if (!isLoadable()) return;
         await options.handler();
         await loader();

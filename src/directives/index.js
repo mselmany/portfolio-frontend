@@ -2,10 +2,14 @@ import Vue from "vue";
 
 import GoBack from "./GoBack";
 import InfiniteLoader from "./InfiniteLoader";
+import Sticky from "./Sticky";
+import Fullscreen from "./Fullscreen";
 
 const directives = {
   GoBack,
-  InfiniteLoader
+  InfiniteLoader,
+  Sticky,
+  Fullscreen
 };
 
 Object.values(directives).forEach(directive => {

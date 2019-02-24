@@ -8,7 +8,15 @@ export default {
     en: "from"
   } */
   LOADING: {
-    tr: "YÃ¼kleniyor",
+    tr: "Yükleniyor",
     en: "Loading"
+  },
+  STICKY_MODE: {
+    tr: "Sabit modda oynat?l?yor...",
+    en: "Playing in sticky mode..."
+  },
+  FULLSCREEN_MODE: {
+    tr: "Tam ekran modu aktif...",
+    en: "Fullscreen mode activated..."
   }
 };

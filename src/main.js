@@ -1,6 +1,7 @@
 import Vue from "vue";
 import { sync } from "vuex-router-sync";
 
+import "@/pollyfils";
 import "@/registerServiceWorker";
 import App from "@/App";
 import router from "@/router";
