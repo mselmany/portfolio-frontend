@@ -26,15 +26,19 @@ export default {
 			type: Object,
 			required: true
 		},
-		toggleFullscreen: {
-			type: Function,
-			default: _ => {}
+		hooks: {
+			type: Object
 		}
 	},
 	langs: {
 		BROKEN_IMAGE: {
 			tr: "Görüntü yüklenemedi",
 			en: "Failed to load image"
+		}
+	},
+	methods: {
+		toggleFullscreen() {
+			this.hooks.fullscreen.toggle();
 		}
 	}
 };

@@ -68,13 +68,13 @@ export default {
 			type: Object,
 			required: true
 		},
-		toggleFullscreen: {
-			type: Function,
-			default: _ => {}
-		},
-		disableSticky: {
-			type: Function,
-			default: _ => {}
+		hooks: {
+			type: Object
+		}
+	},
+	created() {
+		if (!this.data.hasOwnProperty("__state")) {
+			this.data.__state = {};
 		}
 	},
 	mounted() {
@@ -165,7 +165,7 @@ export default {
 			}
 		},
 		disableStickyAndScroll() {
-			this.disableSticky(() => {
+			this.hooks.sticky.disable(() => {
 				setTimeout(() => {
 					this.$el.scrollIntoView({
 						behavior: "smooth",
@@ -181,8 +181,11 @@ export default {
 				this.toggleFullscreen();
 			}
 			if (this.state.sticky.active) {
-				this.disableSticky();
+				this.hooks.sticky.disable();
 			}
+		},
+		toggleFullscreen() {
+			this.hooks.fullscreen.toggle();
 		}
 	}
 };

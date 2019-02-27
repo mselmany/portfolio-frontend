@@ -1,6 +1,6 @@
 <template>
 	<div class="Media">
-		<div class="_FloatingContainer" v-sticky="sticky" v-fullscreen="fullscreen">
+		<div class="_FloatingContainer" v-sticky="directives.sticky" v-fullscreen="directives.fullscreen">
 			<div class="_Info">
 				<span class="_Item __type" :title="$t('PERMALINK')">
 					<a
@@ -30,13 +30,7 @@
 				</span>
 			</div>
 			<div class="_Content">
-				<component
-					:is="current.type + '-item'"
-					:data="current"
-					:state="state"
-					:toggle-fullscreen="toggleFullscreen"
-					:disable-sticky="disableSticky"
-				/>
+				<component :is="current.type + '-item'" :data="current" :state="state" :hooks="hooks"/>
 			</div>
 		</div>
 	</div>
@@ -78,47 +72,50 @@ export default {
 					active: false
 				}
 			},
-			sticky: {
-				onEnable: context => {
-					this.state.sticky.active = true;
+			hooks: {},
+			directives: {
+				sticky: {
+					onEnable: context => {
+						this.state.sticky.active = true;
+					},
+					onDisable: context => {
+						this.state.sticky.active = false;
+					},
+					onChange: context => {}
 				},
-				onDisable: context => {
-					this.state.sticky.active = false;
-				},
-				onChange: context => {}
-			},
-			fullscreen: {
-				onEnable: context => {
-					this.state.fullscreen.active = true;
-					this.$sticky.disable();
-				},
-				onDisable: context => {
-					this.state.fullscreen.active = false;
-					if (this.current.__state.playing) {
-						this.$sticky.enable();
-					}
-				},
-				onChange: context => {},
-				onKeydown: (key, context) => {
-					switch (key) {
-						case KEYS.ESC:
-							this.toggleFullscreen();
-							break;
-						case KEYS.ARROW_LEFT:
-						case KEYS.ARROW_UP:
-							this.prev();
-							break;
-						case KEYS.ARROW_RIGHT:
-						case KEYS.ARROW_DOWN:
-							this.next();
-							break;
-						case KEYS.SPACE:
-							this.current.__state.playPause &&
-								this.current.__state.playPause();
-							break;
+				fullscreen: {
+					onEnable: context => {
+						this.state.fullscreen.active = true;
+						this.$sticky.disable();
+					},
+					onDisable: context => {
+						this.state.fullscreen.active = false;
+						if (this.current.__state.playing) {
+							this.$sticky.enable();
+						}
+					},
+					onChange: context => {},
+					onKeydown: (key, context) => {
+						switch (key) {
+							case KEYS.ESC:
+								this.toggleFullscreen();
+								break;
+							case KEYS.ARROW_LEFT:
+							case KEYS.ARROW_UP:
+								this.prev();
+								break;
+							case KEYS.ARROW_RIGHT:
+							case KEYS.ARROW_DOWN:
+								this.next();
+								break;
+							case KEYS.SPACE:
+								this.current.__state.playPause &&
+									this.current.__state.playPause();
+								break;
 
-						default:
-							break;
+							default:
+								break;
+						}
 					}
 				}
 			}
@@ -144,6 +141,19 @@ export default {
 	},
 	created() {
 		this.current = this.medialist[0];
+	},
+	mounted() {
+		this.hooks = {
+			sticky: {
+				enable: this.$sticky.enable,
+				disable: this.$sticky.disable
+			},
+			fullscreen: {
+				enable: this.$fullscreen.enable,
+				disable: this.$fullscreen.disable,
+				toggle: this.$fullscreen.toggle
+			}
+		};
 	},
 	watch: {
 		playing() {
@@ -191,9 +201,6 @@ export default {
 		},
 		toggleFullscreen() {
 			this.$fullscreen.toggle();
-		},
-		disableSticky(cb) {
-			this.$sticky.disable(cb);
 		}
 	}
 };

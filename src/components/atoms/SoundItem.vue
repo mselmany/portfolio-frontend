@@ -1,7 +1,19 @@
 <template>
 	<div class="Sound">
-		<figure>
-			<audio controls :src="data.src"></audio>
+		<figure class="_FloatingContainer" v-sticky="sticky">
+			<audio ref="audio" preload="metadata" :src="data.src"></audio>
+			<div class="_Player">
+				<div class="_Container">
+					<div class="_Panel">
+						<div class="_Item">{{formattedCurrentTime}} • {{formattedDuration}}</div>
+					</div>
+					<div class="_ProgressBar" ref="progressBar">
+						<div class="_Progress">
+							<div class="_Indicator" :style="{'width': data.__state.percentage + '%'}"></div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</figure>
 	</div>
 </template>
@@ -16,19 +28,141 @@ export default {
 			type: Object,
 			required: true
 		},
-		state: {
-			type: Object,
-			required: false
-		},
-		disableSticky: {
-			type: Function,
-			default: _ => {}
+		hooks: {
+			type: Object
 		}
 	},
-	mounted() {},
-	beforeDestroy() {},
-	computed: {},
-	methods: {}
+	data() {
+		return {
+			state: {
+				sticky: {
+					active: false
+				}
+			},
+			sticky: {
+				onEnable: context => {
+					this.state.sticky.active = true;
+				},
+				onDisable: context => {
+					this.state.sticky.active = false;
+				},
+				onChange: context => {}
+			}
+		};
+	},
+	created() {
+		if (!this.data.hasOwnProperty("__state")) {
+			this.data.__state = {};
+		}
+	},
+	mounted() {
+		const audio = this.$refs.audio,
+			progressBar = this.$refs.progressBar;
+
+		if (!this.data.__state.hasOwnProperty("initialized")) {
+			this.data.__state = {
+				...this.data.__state,
+				initialized: true,
+				playing: false,
+				duration: -1,
+				currentTime: 0,
+				percentage: 0,
+				volume: audio.volume,
+				muted: audio.muted
+			};
+		}
+		this.data.__state.playPause = this.playPause;
+
+		audio.addEventListener("loadedmetadata", () => {
+			let { duration } = audio;
+			this.data.__state.duration = duration;
+		});
+
+		audio.addEventListener("volumechange", () => {
+			let { volume, muted } = audio;
+			this.data.__state.volume = volume;
+			this.data.__state.muted = muted;
+		});
+
+		audio.addEventListener("timeupdate", () => {
+			let { duration, currentTime, paused, ended } = audio;
+			if (this.data.__state.duration === -1) {
+				this.data.__state.duration = duration;
+			}
+			this.data.__state.currentTime = currentTime;
+			this.data.__state.percentage = Math.floor((currentTime / duration) * 100);
+			this.data.__state.playing = !(paused || ended);
+		});
+
+		progressBar.addEventListener("click", function(e) {
+			const pos =
+				(e.pageX - this.getBoundingClientRect().left) / this.offsetWidth;
+			audio.currentTime = pos * audio.duration;
+		});
+	},
+	beforeDestroy() {
+		this.pause();
+	},
+	computed: {
+		formattedCurrentTime() {
+			return formatTime(this.data.__state.currentTime);
+		},
+		formattedDuration() {
+			return formatTime(this.data.__state.duration);
+		}
+	},
+	methods: {
+		playPause() {
+			const audio = this.$refs.audio;
+			if (audio.paused || audio.ended) {
+				this.play();
+			} else {
+				this.pause();
+			}
+		},
+		play() {
+			this.data.__state.playing = true;
+			this.$refs.audio.play();
+		},
+		pause() {
+			this.data.__state.playing = false;
+			this.$refs.audio.pause();
+		},
+		changeVolume() {
+			const audio = this.$refs.audio;
+			if (audio.muted) {
+				audio.muted = false;
+			} else if (audio.volume <= 0.5) {
+				audio.volume = 1;
+			} else if (!audio.muted) {
+				audio.muted = true;
+				audio.volume = 0.5;
+			}
+		},
+		disableStickyAndScroll() {
+			this.hooks.sticky.disable(() => {
+				setTimeout(() => {
+					this.$el.scrollIntoView({
+						behavior: "smooth",
+						block: "center",
+						inline: "center"
+					});
+				});
+			});
+		},
+		disableStickyAndPause() {
+			this.pause();
+			if (this.state.fullscreen.active) {
+				this.toggleFullscreen();
+			}
+			if (this.state.sticky.active) {
+				this.hooks.sticky.disable();
+			}
+		},
+		toggleFullscreen() {
+			this.hooks.fullscreen.toggle();
+		}
+	}
 };
 </script>
 
