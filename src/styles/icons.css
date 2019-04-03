@@ -10,10 +10,20 @@
   background-position: center;
   background-size: initial;
   /* background-size: contain; */
+  &.__mode-contain {
+    background-size: contain;
+  }
+  &.__mode-cover {
+    background-size: cover;
+  }
   &.__actions {
     /* transition: var(--Transition); */
     &:hover {
       opacity: 0.75;
+    }
+
+    &:active {
+      transform: scale(0.9);
     }
   }
   &.__white {
@@ -132,5 +142,29 @@
   }
   &.__close2 {
     background-image: url("../assets/icon_close2.svg");
+  }
+  &.__addToPlaylist {
+    background-image: url("../assets/icon_addtoplaylist.svg");
+  }
+  &.__removeFromPlaylist {
+    background-image: url("../assets/icon_removefromplaylist.svg");
+  }
+  &.__addedToPlaylist {
+    background-image: url("../assets/icon_addedtoplaylist.svg");
+  }
+  &.__toggleToPlaylist {
+    background-image: url("../assets/icon_addedtoplaylist.svg");
+    &:hover {
+      background-image: url("../assets/icon_removefromplaylist.svg");
+    }
+  }
+  &.__plus2 {
+    background-image: url("../assets/icon_plus2.svg");
+  }
+  &.__minus2 {
+    background-image: url("../assets/icon_minus2.svg");
+  }
+  &.__tick2 {
+    background-image: url("../assets/icon_tick2.svg");
   }
 }

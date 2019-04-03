@@ -81,3 +81,91 @@
     /* text-transform: uppercase; */
   }
 }
+
+/* v-sticky (Sticky) directive */
+
+[resizer-top],
+[resizer-right],
+[resizer-bottom],
+[resizer-left],
+[resizer-topleft],
+[resizer-topright],
+[resizer-bottomright],
+[resizer-bottomleft] {
+  --ResizerSize: 3px;
+  --ResizerBackgroundColor: #444;
+  position: absolute;
+  background-color: var(--ResizerBackgroundColor);
+  &:hover {
+    background-color: var(--ResizerBackgroundColor);
+  }
+}
+[resizer-top],
+[resizer-right],
+[resizer-bottom],
+[resizer-left] {
+  z-index: 999998;
+}
+
+[resizer-top] {
+  width: 100%;
+  height: var(--ResizerSize);
+  top: 0;
+  left: 0;
+  cursor: n-resize;
+}
+[resizer-right] {
+  width: var(--ResizerSize);
+  height: 100%;
+  top: 0;
+  right: 0;
+  cursor: e-resize;
+}
+[resizer-bottom] {
+  width: 100%;
+  height: var(--ResizerSize);
+  bottom: 0;
+  left: 0;
+  cursor: s-resize;
+}
+[resizer-left] {
+  width: var(--ResizerSize);
+  height: 100%;
+  top: 0;
+  left: 0;
+  cursor: w-resize;
+}
+[resizer-topleft],
+[resizer-topright],
+[resizer-bottomright],
+[resizer-bottomleft] {
+  z-index: 999999;
+}
+[resizer-topleft] {
+  width: var(--ResizerSize);
+  height: var(--ResizerSize);
+  top: 0;
+  left: 0;
+  cursor: nw-resize;
+}
+[resizer-topright] {
+  width: var(--ResizerSize);
+  height: var(--ResizerSize);
+  top: 0;
+  right: 0;
+  cursor: ne-resize;
+}
+[resizer-bottomright] {
+  width: var(--ResizerSize);
+  height: var(--ResizerSize);
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
+}
+[resizer-bottomleft] {
+  width: var(--ResizerSize);
+  height: var(--ResizerSize);
+  bottom: 0;
+  left: 0;
+  cursor: sw-resize;
+}

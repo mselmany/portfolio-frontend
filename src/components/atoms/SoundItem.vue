@@ -1,109 +1,74 @@
 <template>
-	<div class="Sound">
-		<figure class="_FloatingContainer" v-sticky="sticky">
-			<audio ref="audio" preload="metadata" :src="data.src"></audio>
-			<div class="_Player">
-				<div class="_Container">
-					<div class="_Panel">
-						<div class="_Item">{{formattedCurrentTime}} � {{formattedDuration}}</div>
-					</div>
-					<div class="_ProgressBar" ref="progressBar">
-						<div class="_Progress">
-							<div class="_Indicator" :style="{'width': data.__state.percentage + '%'}"></div>
-						</div>
-					</div>
+	<figure class="Sound">
+		<audio ref="audio" preload="metadata" :src="data.src"></audio>
+		<div class="Sound__Player" :class="{'Sound__Player--touched': data.__state.playing}">
+			<img
+				class="Sound__Artwork"
+				draggable="false"
+				@click="playPause()"
+				:src="data.artwork"
+				:style="{'transform': `rotate(${(data.__state.currentTime % 360) * 2.5}deg) translateZ(0)`}"
+			>
+			<div
+				class="Sound__Progress"
+				ref="progressBar"
+				@click="updateProgressbar"
+				v-if="data.__state.currentTime > 0"
+			>
+				<div class="Sound__ProgressRail">
+					<div class="Sound__ProgressStatus" :style="{'width': data.__state.percentage + '%'}"></div>
 				</div>
 			</div>
-		</figure>
-	</div>
+		</div>
+		<div class="Sound__Meta">
+			<div class="Sound__Actions __oneLine">
+				<div class="Sound__Button" @click="playPause()">
+					<div
+						class="Icon __mode-contain __actions __black"
+						:class="data.__state.playing ? '__pause': '__play'"
+					></div>
+				</div>
+				<div class="Sound__Button" @click="addToPlaylist();">
+					<div
+						class="Icon __mode-contain __actions __black"
+						:class="data.__state.liked ? '__toggleToPlaylist': '__addToPlaylist'"
+					></div>
+				</div>
+				<span class="Utils--tabular">{{formattedCurrentTime}}∙{{formattedDuration}}</span>
+			</div>
+			<div class="Sound__Title __oneLine" v-if="data.title">
+				<span>{{data.title}}</span>
+			</div>
+			<div class="Sound__Label __oneLine" v-if="data.label">
+				<span>{{data.label}}</span>
+			</div>
+		</div>
+	</figure>
 </template>
 
 <script>
-import { formatTime } from "@/helpers/utils";
+import { formatTime, raf, generateId } from "@/helpers/utils";
+import { mapActions, mapState } from "vuex";
+import { ADD, REMOVE, TOGGLE } from "@/store/modules/player/types";
 
 export default {
 	name: "SoundItem",
 	props: {
 		data: {
 			type: Object,
-			required: true
+			required: true,
+			default: () => ({ __state: {} })
 		},
-		hooks: {
+		state: {
 			type: Object
+		},
+		actions: {
+			type: Object,
+			default: () => ({})
 		}
-	},
-	data() {
-		return {
-			state: {
-				sticky: {
-					active: false
-				}
-			},
-			sticky: {
-				onEnable: context => {
-					this.state.sticky.active = true;
-				},
-				onDisable: context => {
-					this.state.sticky.active = false;
-				},
-				onChange: context => {}
-			}
-		};
-	},
-	created() {
-		if (!this.data.hasOwnProperty("__state")) {
-			this.data.__state = {};
-		}
-	},
-	mounted() {
-		const audio = this.$refs.audio,
-			progressBar = this.$refs.progressBar;
-
-		if (!this.data.__state.hasOwnProperty("initialized")) {
-			this.data.__state = {
-				...this.data.__state,
-				initialized: true,
-				playing: false,
-				duration: -1,
-				currentTime: 0,
-				percentage: 0,
-				volume: audio.volume,
-				muted: audio.muted
-			};
-		}
-		this.data.__state.playPause = this.playPause;
-
-		audio.addEventListener("loadedmetadata", () => {
-			let { duration } = audio;
-			this.data.__state.duration = duration;
-		});
-
-		audio.addEventListener("volumechange", () => {
-			let { volume, muted } = audio;
-			this.data.__state.volume = volume;
-			this.data.__state.muted = muted;
-		});
-
-		audio.addEventListener("timeupdate", () => {
-			let { duration, currentTime, paused, ended } = audio;
-			if (this.data.__state.duration === -1) {
-				this.data.__state.duration = duration;
-			}
-			this.data.__state.currentTime = currentTime;
-			this.data.__state.percentage = Math.floor((currentTime / duration) * 100);
-			this.data.__state.playing = !(paused || ended);
-		});
-
-		progressBar.addEventListener("click", function(e) {
-			const pos =
-				(e.pageX - this.getBoundingClientRect().left) / this.offsetWidth;
-			audio.currentTime = pos * audio.duration;
-		});
-	},
-	beforeDestroy() {
-		this.pause();
 	},
 	computed: {
+		...mapState("player", ["list"]),
 		formattedCurrentTime() {
 			return formatTime(this.data.__state.currentTime);
 		},
@@ -111,13 +76,127 @@ export default {
 			return formatTime(this.data.__state.duration);
 		}
 	},
+	created() {
+		this.actions.playPause = this.playPause;
+	},
+	mounted() {
+		const audio = this.$refs.audio;
+
+		this.init();
+		if (this.list.length < 15) {
+			this.addToPlaylist();
+		}
+
+		audio.addEventListener("loadedmetadata", () => {
+			let { duration } = audio;
+			this.data.__state.duration = duration;
+
+			if (this.actions.onLoad) {
+				this.actions.onLoad(this.data.__state);
+			}
+		});
+
+		audio.addEventListener("volumechange", () => {
+			let { volume, muted } = audio;
+			this.data.__state.volume = volume;
+			this.data.__state.muted = muted;
+
+			if (this.actions.onVolumeChange) {
+				this.actions.onVolumeChange(this.data.__state);
+			}
+		});
+
+		audio.addEventListener("timeupdate", () => {
+			let { duration, currentTime, paused, ended } = audio;
+			if (this.data.__state.duration === 0) {
+				this.data.__state.duration = duration;
+			}
+			this.data.__state.currentTime = currentTime;
+			this.data.__state.percentage = Math.floor((currentTime / duration) * 100);
+			this.data.__state.playing = !(paused || ended);
+
+			if (this.actions.onTimeUpdate) {
+				this.actions.onTimeUpdate(this.data.__state);
+			}
+		});
+
+		// TODO@3: Progressbar mouse sürükle-bırak ile ileri-geri sarılabilmeli.
+		// TODO@3: Float/pin halindeki mediayı(audio) resize edilebilir yap.
+	},
+	beforeDestroy() {
+		this.pause();
+	},
 	methods: {
+		...mapActions("player", [TOGGLE]),
+		init() {
+			const audio = this.$refs.audio;
+
+			if (!this.data.__state.initialized) {
+				this.data.__state = {
+					...this.data.__state,
+					id: generateId(),
+					initialized: true,
+					playing: false,
+					duration: 0,
+					currentTime: 0,
+					percentage: 0,
+					volume: audio.volume || 1,
+					muted: audio.muted || false,
+					liked: false
+				};
+			} else {
+				const {
+					currentTime = 0,
+					volume = 1,
+					muted = false
+				} = this.data.__state;
+				audio.currentTime = currentTime;
+				audio.volume = volume;
+				audio.muted = muted;
+			}
+		},
+		addToPlaylist() {
+			const { type, permalink, title, label, artwork } = this.data;
+
+			this.data.__state.liked = !this.data.__state.liked;
+
+			this[TOGGLE]({
+				id: this.data.__state.id,
+				type,
+				source: this.$refs.audio,
+				actions: {
+					playPause: this.playPause,
+					changeVolume: this.changeVolume,
+					updateProgressbar: this.updateProgressbar
+				},
+				meta: { permalink, title, label, artwork }
+			});
+		},
+		updateProgressbar(event) {
+			const audio = this.$refs.audio,
+				progressBar = this.$refs.progressBar;
+
+			raf(() => {
+				const pos =
+					(event.pageX - progressBar.getBoundingClientRect().left) /
+					progressBar.offsetWidth;
+				audio.currentTime = pos * audio.duration;
+			});
+
+			if (this.actions.onProgressChange) {
+				this.actions.onProgressChange(this.data.__state);
+			}
+		},
 		playPause() {
 			const audio = this.$refs.audio;
 			if (audio.paused || audio.ended) {
 				this.play();
 			} else {
 				this.pause();
+			}
+
+			if (this.actions.onPlayStateChange) {
+				this.actions.onPlayStateChange(this.data.__state);
 			}
 		},
 		play() {
@@ -140,27 +219,23 @@ export default {
 			}
 		},
 		disableStickyAndScroll() {
-			this.hooks.sticky.disable(() => {
-				setTimeout(() => {
-					this.$el.scrollIntoView({
-						behavior: "smooth",
-						block: "center",
-						inline: "center"
-					});
-				});
-			});
+			if (this.actions.sticky) {
+				this.actions.sticky.disable({ scrollTo: this.$el });
+			}
 		},
 		disableStickyAndPause() {
 			this.pause();
-			if (this.state.fullscreen.active) {
+			if (this.actions.fullscreen && this.actions.fullscreen.active) {
 				this.toggleFullscreen();
 			}
-			if (this.state.sticky.active) {
-				this.hooks.sticky.disable();
+			if (this.actions.sticky && this.actions.sticky.active) {
+				this.actions.sticky.disable();
 			}
 		},
 		toggleFullscreen() {
-			this.hooks.fullscreen.toggle();
+			if (this.actions.fullscreen) {
+				this.actions.fullscreen.toggle();
+			}
 		}
 	}
 };
@@ -170,212 +245,126 @@ export default {
 @import url("../../styles/variables.css");
 
 .Sound {
+	--Size: 4.5rem;
 	--BackgroundColor: var(--DefaultColor);
 	--Color: var(--DefaultBackgroundColor);
 	--Transition: var(--DefaultTransition);
 
-	--ProgressBarHeight: 2rem;
+	--BoxShadow: 0 1px 4px 0 #ccc;
 	--ProgressHeight: 0.2rem;
+	--ProgressBgColor: rgba(0, 0, 0, 0.25);
 	--ProgressColor: #cd201f;
-	--ProgressBgColor: var(--DefaultColor);
 
 	display: block;
 	width: 100%;
-	height: 100%;
 	font-size: 1rem;
 	position: relative;
 	margin: 0;
-	padding: 0;
+	padding: 1rem 0;
 
 	display: flex;
-	justify-content: center;
+	/* justify-content: center; */
 	align-items: center;
 
-	& .__Hover,
-	& figure:hover .__NotHover {
-		display: none !important;
-	}
-	& figure:hover .__Hover {
-		display: block !important;
-		&._Layer {
-			display: flex !important;
-		}
-	}
-
-	& figure {
+	& .Sound__Player {
 		display: block;
-		position: relative;
-		margin: 0;
-		padding: 0;
-		max-width: 100%;
-		max-height: 100%;
-	}
+		width: var(--Size);
+		height: var(--Size);
+		transition: var(--Transition);
 
-	& ._Controls {
-		width: 1px;
-		height: 0;
-		position: static;
-		& ._Layer {
-			display: flex;
-			flex-direction: row;
-			position: absolute;
-			z-index: 2;
-			background-color: greenyellow;
-
-			&.__topLeft {
-				top: 0.5rem;
-			}
-			&.__topRight {
-				top: 0.5rem;
-			}
-			&.__bottomRight {
-				bottom: 0.5rem;
-			}
-			&.__bottomLeft {
-				bottom: 0.5rem;
-			}
-			&.__topLeft,
-			&.__bottomLeft {
-				left: 0.5rem;
-				/* & > *:not(:last-of-type) {
-          margin-right: 0.5rem;
-        } */
-			}
-			&.__topRight,
-			&.__bottomRight {
-				right: 0.5rem;
-				flex-direction: row-reverse;
-
-				/* & > *:not(:last-of-type) {
-          margin-left: 0.5rem;
-        } */
-			}
-		}
-		& ._Item {
-			width: 1.25rem;
-			height: 1.25rem;
-			background-color: var(--BackgroundColor);
-			position: relative;
-			cursor: pointer;
-			border: 0.3rem solid;
-			& ._Icon {
-				background-size: contain;
-			}
+		&.Sound__Player--touched {
+			transform: scale(0.95);
 		}
 	}
-	& ._PlayPauseArea {
+
+	& .Sound__Artwork {
+		display: block;
 		width: 100%;
 		height: 100%;
-		position: absolute;
-		left: 0;
-		top: 0;
-		z-index: 1;
+		background-color: var(--Color);
+		box-shadow: var(--BoxShadow);
+		border-radius: 50%;
+		overflow: hidden;
+		transition: 0.1s linear;
+		will-change: transform;
 		cursor: pointer;
 	}
-	& ._Player {
-		position: absolute;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		z-index: 2;
 
-		& ._Container {
-			width: auto;
-			position: relative;
-			transition: var(--Transition);
-		}
+	& .Sound__Progress {
+		width: 50%;
+		margin: auto;
+		margin-top: 0.5rem;
+		padding: 0.15rem 0;
 
-		& ._Panel {
-			width: 100%;
-			position: relative;
-			z-index: 2;
-			padding: 0 1rem;
-			font-size: 0.8rem;
-			line-height: 1rem;
-			color: var(--BackgroundColor);
-			transition: var(--Transition);
-			opacity: 0;
-			visibility: hidden;
-		}
-
-		& ._ProgressBar {
-			width: 100%;
-			height: 1rem;
-			display: block;
-			transition: var(--Transition);
-			cursor: pointer;
-
-			& ._Progress {
-				width: auto;
-				height: calc(var(--ProgressHeight) / 2);
-				min-height: 2px;
-				display: block;
-				position: absolute;
-				left: 0;
-				right: 0;
-				bottom: 0;
-				background-color: var(--ProgressBgColor);
-				transition: inherit;
-				cursor: pointer;
-
-				& ._Indicator {
-					height: 100%;
-					display: block;
-					position: relative;
-					background-color: var(--ProgressColor);
-
-					&:after {
-						content: "";
-						box-sizing: initial;
-						width: var(--ProgressHeight);
-						height: var(--ProgressHeight);
-						position: absolute;
-						top: -0.3rem;
-						right: calc(((var(--ProgressHeight) / 2) + 0.3rem) * -1);
-						border: 0.3rem solid currentColor;
-						background-color: var(--Color);
-						color: var(--Color);
-						box-shadow: 0 0 calc(var(--ProgressHeight) / 2)
-							color-mod(var(--BackgroundColor) a(25%));
-						border-radius: 50%;
-						transition: var(--Transition);
-						transform: scale(0.5);
-						visibility: hidden;
-					}
-				}
-			}
+		&:hover .Sound__ProgressRail {
+			height: calc(var(--ProgressHeight) + 0.1rem);
+			transform: translateY(-0.05rem);
 		}
 	}
 
-	& figure:hover {
-		& ._Player {
-			& ._Container {
-				margin: 0 1rem;
-			}
+	& .Sound__ProgressRail {
+		width: 100%;
+		height: var(--ProgressHeight);
+		background-color: var(--ProgressBgColor);
+		border-radius: 1rem;
+		overflow: hidden;
+		cursor: pointer;
+		transition: var(--Transition);
+	}
 
-			& ._Panel {
-				padding: 0;
-				opacity: 1;
-				visibility: visible;
-			}
+	& .Sound__ProgressStatus {
+		width: auto;
+		height: 100%;
+		background-color: var(--ProgressColor);
+	}
 
-			& ._ProgressBar {
-				height: var(--ProgressBarHeight);
+	& .Sound__Button {
+		display: inline-block;
+		position: relative;
+		width: 0.75rem;
+		height: 0.75rem;
+		margin-right: 0.5rem;
+		cursor: pointer;
+	}
 
-				&:hover ._Indicator:after {
-					transform: scale(1);
-				}
+	& .Sound__Meta {
+		width: calc(100% - var(--Size));
+		padding-left: 1rem;
+	}
 
-				& ._Progress {
-					height: var(--ProgressHeight);
-					bottom: calc(1rem - (var(--ProgressHeight) / 2));
+	& .Sound__Actions {
+		font-size: 0.85rem;
+	}
 
-					& ._Indicator:after {
-						visibility: visible;
-					}
-				}
-			}
+	& .Sound__Title {
+		/* text-transform: capitalize; */
+	}
+
+	& .Sound__Label {
+		font-family: "Playfair Display";
+		font-style: italic;
+	}
+
+	& .__oneLine {
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		&:not(:last-child) {
+			padding-bottom: 0.5rem;
 		}
 	}
+
+	/* & .Sound--playing {
+		animation: Sound--playing 10s linear infinite;
+	} */
 }
+
+/* @keyframes Sound--playing {
+	from {
+		transform: rotate(0);
+	}
+	to {
+		transform: rotate(1turn);
+	}
+} */
 </style>

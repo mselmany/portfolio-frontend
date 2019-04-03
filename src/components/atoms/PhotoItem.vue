@@ -15,19 +15,22 @@
 </template>
 
 <script>
+// TODO@2: imageları lazy load olarak yüklenebilir hale getir (inviewport taysa)
+
 export default {
 	name: "PhotoItem",
 	props: {
 		data: {
 			type: Object,
-			required: true
+			required: true,
+			default: () => ({ __state: {} })
 		},
 		state: {
-			type: Object,
-			required: true
-		},
-		hooks: {
 			type: Object
+		},
+		actions: {
+			type: Object,
+			default: () => ({})
 		}
 	},
 	langs: {
@@ -38,7 +41,9 @@ export default {
 	},
 	methods: {
 		toggleFullscreen() {
-			this.hooks.fullscreen.toggle();
+			if (this.actions.fullscreen) {
+				this.actions.fullscreen.toggle();
+			}
 		}
 	}
 };
@@ -148,7 +153,7 @@ export default {
 <style lang="postcss">
 @import url("../../styles/variables.css");
 
-.Media.__Fullscreen .Photo {
+.Media [fullscreen-active] .Photo {
 	& img {
 		cursor: zoom-out;
 	}

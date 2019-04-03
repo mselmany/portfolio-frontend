@@ -51,10 +51,7 @@
               "display_url": "pic.twitter.com/FRgxdo2OMz",
               "type": "animated_gif",
               "video_info": {
-                "aspect_ratio": [
-                  25,
-                  14
-                ],
+                "aspect_ratio": [25, 14],
                 "source": {
                   "bitrate": 0,
                   "content_type": "video/mp4",
@@ -76,10 +73,7 @@
               "display_url": "pic.twitter.com/urLtKFsb3l",
               "type": "video",
               "video_info": {
-                "aspect_ratio": [
-                  1,
-                  1
-                ],
+                "aspect_ratio": [1, 1],
                 "duration_millis": 6934,
                 "source": {
                   "bitrate": 1280000,
@@ -131,17 +125,15 @@
           "__createdAt": 1541965490883,
           "tweet_url": "https://twitter.com/suspiria1977/status/946553597239746560",
           "text": "Black Mirror: A summary",
-          "media": [{
+          "media": [
+            {
               "id_str": "1058567176590749696",
               "media_url_https": "https://pbs.twimg.com/ext_tw_video_thumb/1058567176590749696/pu/img/DdZJzikkVtX4fOUx.jpg",
               "url": "https://t.co/GPDTK5bBde",
               "display_url": "pic.twitter.com/GPDTK5bBde",
               "type": "video",
               "video_info": {
-                "aspect_ratio": [
-                  1,
-                  1
-                ],
+                "aspect_ratio": [1, 1],
                 "duration_millis": 17467,
                 "source": {
                   "bitrate": 1280000,
@@ -149,22 +141,72 @@
                   "url": "https://video.twimg.com/ext_tw_video/1058567176590749696/pu/vid/720x720/YzXp7SAgThF6nJn2.mp4?tag=5"
                 }
               }
-            },
-            {
-              "id_str": "946553508454572033",
-              "media_url_https": "https://pbs.twimg.com/tweet_video_thumb/DSLVZqBVoAEbSEw.jpg",
-              "url": "https://t.co/FRgxdo2OMz",
-              "display_url": "pic.twitter.com/FRgxdo2OMz",
-              "type": "animated_gif",
+            },{
+              "id_str": "1051489307654021120",
+              "media_url_https": "https://pbs.twimg.com/ext_tw_video_thumb/1051489307654021120/pu/img/0GLfexOVt72xfAiV.jpg",
+              "url": "https://t.co/urLtKFsb3l",
+              "display_url": "pic.twitter.com/urLtKFsb3l",
+              "type": "video",
               "video_info": {
                 "aspect_ratio": [
-                  25,
-                  14
+                  1,
+                  1
                 ],
+                "duration_millis": 6934,
                 "source": {
-                  "bitrate": 0,
+                  "bitrate": 1280000,
                   "content_type": "video/mp4",
-                  "url": "https://video.twimg.com/tweet_video/DSLVZqBVoAEbSEw.mp4"
+                  "url": "https://video.twimg.com/ext_tw_video/1051489307654021120/pu/vid/720x720/7X33behk-JalOU6A.mp4?tag=5"
+                }
+              }
+            },
+            {
+              "id_str": "1058567176590749696",
+              "media_url_https": "https://pbs.twimg.com/ext_tw_video_thumb/1058567176590749696/pu/img/DdZJzikkVtX4fOUx.jpg",
+              "url": "https://t.co/GPDTK5bBde",
+              "display_url": "pic.twitter.com/GPDTK5bBde",
+              "type": "video",
+              "video_info": {
+                "aspect_ratio": [1, 1],
+                "duration_millis": 17467,
+                "source": {
+                  "bitrate": 1280000,
+                  "content_type": "video/mp4",
+                  "url": "https://video.twimg.com/ext_tw_video/1058567176590749696/pu/vid/720x720/YzXp7SAgThF6nJn2.mp4?tag=5"
+                }
+              }
+            },{
+              "id_str": "1051489307654021120",
+              "media_url_https": "https://pbs.twimg.com/ext_tw_video_thumb/1051489307654021120/pu/img/0GLfexOVt72xfAiV.jpg",
+              "url": "https://t.co/urLtKFsb3l",
+              "display_url": "pic.twitter.com/urLtKFsb3l",
+              "type": "video",
+              "video_info": {
+                "aspect_ratio": [
+                  1,
+                  1
+                ],
+                "duration_millis": 6934,
+                "source": {
+                  "bitrate": 1280000,
+                  "content_type": "video/mp4",
+                  "url": "https://video.twimg.com/ext_tw_video/1051489307654021120/pu/vid/720x720/7X33behk-JalOU6A.mp4?tag=5"
+                }
+              }
+            },
+            {
+              "id_str": "1058567176590749696",
+              "media_url_https": "https://pbs.twimg.com/ext_tw_video_thumb/1058567176590749696/pu/img/DdZJzikkVtX4fOUx.jpg",
+              "url": "https://t.co/GPDTK5bBde",
+              "display_url": "pic.twitter.com/GPDTK5bBde",
+              "type": "video",
+              "video_info": {
+                "aspect_ratio": [1, 1],
+                "duration_millis": 17467,
+                "source": {
+                  "bitrate": 1280000,
+                  "content_type": "video/mp4",
+                  "url": "https://video.twimg.com/ext_tw_video/1058567176590749696/pu/vid/720x720/YzXp7SAgThF6nJn2.mp4?tag=5"
                 }
               }
             }

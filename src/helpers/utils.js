@@ -11,6 +11,15 @@ const locale = {
   tr
 };
 
+export const KEYS = {
+  ESC: 27,
+  SPACE: 32,
+  ARROW_LEFT: 37,
+  ARROW_UP: 38,
+  ARROW_RIGHT: 39,
+  ARROW_DOWN: 40
+};
+
 export function error(message) {
   throw new Error(message);
 }
@@ -124,8 +133,8 @@ export function markAsViewed({
   if (!list.length) return [];
   let markedItems = [];
   for (const item of list) {
-    let { __computed, __source } = item;
     if (!amount) break;
+    let { __computed, __source } = item;
     // if item is not viewed
     if (!__computed.viewed) {
       // if type filter exist and item is not filtered type

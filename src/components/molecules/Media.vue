@@ -15,36 +15,35 @@
 				>{{current.__state.index + 1}} / {{medialist.length}}</span>
 				<span class="_Item __navigation __noDot">
 					<div
-						class="_Icon Icon __black"
+						class="_Icon Icon __actions __black"
 						:class="current.__state.playing ? '__pause': '__play'"
 						v-if="current.__state.initialized"
-						@click="current.__state.playPause()"
+						@click="actions.playPause()"
 					></div>
-					<div class="_Icon Icon __back __black" @click="prev()" v-if="medialist.length > 1"></div>
-					<div class="_Icon Icon __next __black" @click="next()" v-if="medialist.length > 1"></div>
+					<div class="_Icon Icon __actions __back __black" @click="prev()" v-if="medialist.length > 1"></div>
+					<div class="_Icon Icon __actions __next __black" @click="next()" v-if="medialist.length > 1"></div>
 					<div
-						class="_Icon Icon __black"
+						class="_Icon Icon __actions __black"
 						:class="{'__fullscreenExit2': state.fullscreen.active, '__fullscreen2': !state.fullscreen.active}"
 						@click="toggleFullscreen()"
 					></div>
 				</span>
 			</div>
 			<div class="_Content">
-				<component :is="current.type + '-item'" :data="current" :state="state" :hooks="hooks"/>
+				<component
+					:is="current.type + '-item'"
+					:key="current.__state.index"
+					:data="current"
+					:state="state"
+					:actions="actions"
+				/>
 			</div>
 		</div>
 	</div>
 </template>
 
 <script>
-const KEYS = {
-	ESC: 27,
-	SPACE: 32,
-	ARROW_LEFT: 37,
-	ARROW_UP: 38,
-	ARROW_RIGHT: 39,
-	ARROW_DOWN: 40
-};
+import { KEYS } from "@/helpers/utils";
 
 export default {
 	name: "Media",
@@ -66,39 +65,52 @@ export default {
 			current: null,
 			state: {
 				sticky: {
-					active: false
+					active: false,
+					direction: null
 				},
 				fullscreen: {
 					active: false
 				}
 			},
-			hooks: {},
+			actions: {
+				onPlayStateChange: p => {
+					// do not trigger sticky mode if already sticky mode or in fullscreen
+					if (this.$sticky.direction || this.$fullscreen.active) {
+						return;
+					}
+
+					if (p.playing) {
+						this.$sticky.enable();
+					} else {
+						this.$sticky.disable();
+					}
+				}
+			},
 			directives: {
 				sticky: {
-					onEnable: context => {
-						this.state.sticky.active = true;
+					onChange: ctx => {
+						this.state.sticky.active = ctx.active;
+						this.state.sticky.direction = ctx.direction;
 					},
-					onDisable: context => {
-						this.state.sticky.active = false;
-					},
-					onChange: context => {}
+					onDirectionChange: ctx => {
+						this.state.sticky.direction = ctx.direction;
+					}
 				},
 				fullscreen: {
-					onEnable: context => {
-						this.state.fullscreen.active = true;
-						this.$sticky.disable();
-					},
-					onDisable: context => {
-						this.state.fullscreen.active = false;
-						if (this.current.__state.playing) {
-							this.$sticky.enable();
+					onChange: ctx => {
+						this.state.fullscreen.active = ctx.active;
+						if (ctx.active) {
+							this.$sticky.disable();
+						} else {
+							if (this.current.__state.playing) {
+								this.$sticky.enable();
+							}
 						}
 					},
-					onChange: context => {},
-					onKeydown: (key, context) => {
+					onKeydown: (key, ctx) => {
 						switch (key) {
 							case KEYS.ESC:
-								this.toggleFullscreen();
+								ctx.toggle();
 								break;
 							case KEYS.ARROW_LEFT:
 							case KEYS.ARROW_UP:
@@ -109,10 +121,10 @@ export default {
 								this.next();
 								break;
 							case KEYS.SPACE:
-								this.current.__state.playPause &&
-									this.current.__state.playPause();
+								if (this.actions.playPause) {
+									this.actions.playPause();
+								}
 								break;
-
 							default:
 								break;
 						}
@@ -134,6 +146,10 @@ export default {
 			tr: "Video",
 			en: "Video"
 		},
+		SOUND: {
+			tr: "Ses",
+			en: "Sound"
+		},
 		GIF: {
 			tr: "GIF",
 			en: "GIF"
@@ -143,39 +159,11 @@ export default {
 		this.current = this.medialist[0];
 	},
 	mounted() {
-		this.hooks = {
-			sticky: {
-				enable: this.$sticky.enable,
-				disable: this.$sticky.disable
-			},
-			fullscreen: {
-				enable: this.$fullscreen.enable,
-				disable: this.$fullscreen.disable,
-				toggle: this.$fullscreen.toggle
-			}
+		this.actions = {
+			...this.actions,
+			sticky: this.$sticky,
+			fullscreen: this.$fullscreen
 		};
-	},
-	watch: {
-		playing() {
-			// do not trigger sticky mode if already sticky mode or in fullscreen
-			if (this.$sticky.active || this.$fullscreen.active) {
-				return;
-			}
-
-			if (this.current.__state.playing) {
-				this.$sticky.enable();
-			} else {
-				this.$sticky.disable();
-			}
-		}
-	},
-	computed: {
-		// for listen player state changes
-		playing() {
-			if (this.current && this.current.__state) {
-				return this.current.__state.playing;
-			}
-		}
 	},
 	methods: {
 		navigate(direction) {
@@ -321,7 +309,7 @@ background: linear-gradient(135deg, rgb(201, 201, 201) 0%, rgb(120, 120, 120) 10
 				margin-left: 0.35rem;
 
 				&:before {
-					content: "•";
+					content: "・";
 					padding-right: 0.3rem;
 				}
 			}
