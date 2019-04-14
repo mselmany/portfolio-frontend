@@ -4,50 +4,56 @@
 		<ul class="Player__Playlist Utils--unorderedList">
 			<li
 				class="Player__PlaylistItem"
-				v-for="l in list"
+				v-for="l in playlist"
 				:key="l.id"
-				:class="l.meta.title === 'Safinteam - The Dellusion (Original Mix)' && '__playing'"
+				:class="{'__playing': l.__state.playing}"
 			>
 				<div class="Player__Line Player__LineCounter Utils--textEllipsis">
 					<span>{{l.meta.title}}</span>
 					<span class="Player__LineButton __play" @click="playPause(l)">
 						<div
 							class="Icon __mode-contain __actions __white"
-							:class="l.source.paused ? '__pause' : '__play'"
+							:class="l.__state.playing ? '__pause' : '__play'"
 						></div>
 					</span>
 					<span class="Player__LineButton __remove" @click="removeFromPlaylist(l.id)">
 						<div class="Icon __mode-contain __actions __white __removeFromPlaylist"></div>
 					</span>
 				</div>
-				<div class="Player__LineProgress" :style="{'width': '11%'}"></div>
+				<div class="Player__LineProgress" :style="{'width': l.__state.percentage + '%'}"></div>
 			</li>
 		</ul>
 	</div>
 </template>
 
 <script>
-import { mapState, mapActions } from "vuex";
-import { TOGGLE } from "@/store/modules/player/types";
+import { mapMutations, mapGetters, mapActions, mapState } from "vuex";
+import {
+	TOGGLE_FROM_PLAYLIST,
+	UPDATE_CURRENT
+} from "@/store/modules/player/types";
 
 export default {
 	name: "Player",
 	data() {
-		return {
-			current: null
-		};
+		return {};
 	},
 	computed: {
-		...mapState("player", ["list"])
+		...mapState("player", ["playlist", "current"])
 	},
+	watch: {},
 	methods: {
-		...mapActions("player", [TOGGLE]),
-		playPause(item) {
-			item.actions.playPause();
-			this.current = item;
+		...mapActions("player", [TOGGLE_FROM_PLAYLIST]),
+		...mapMutations("player", [UPDATE_CURRENT]),
+		playPause(l) {
+			if (l.source.paused || l.source.ended) {
+				l.source.play();
+			} else {
+				l.source.pause();
+			}
 		},
 		removeFromPlaylist(id) {
-			this[TOGGLE]({ id });
+			this[TOGGLE_FROM_PLAYLIST](id);
 		}
 	}
 };

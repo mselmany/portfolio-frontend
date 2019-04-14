@@ -1,30 +1,31 @@
-import { TOGGLE, ADD, REMOVE } from "./types";
+import { TOGGLE_FROM_PLAYLIST } from "./types";
 import { NOTIFY } from "@/store/modules/common/types";
 import { error } from "@/helpers/utils";
 
 export default {
-  async [TOGGLE](
-    { dispatch, commit, state },
-    media = error("'media' is missing!")
+  async [TOGGLE_FROM_PLAYLIST](
+    { dispatch, commit, getters },
+    _id = error("'id' is missing!")
   ) {
-    const { id } = media;
-    const isExist = state.list.find(item => item.id === id);
+    let media = getters.getMedia(_id);
+    if (media) {
+      commit(TOGGLE_FROM_PLAYLIST, _id);
+      // media.addedToPlaylist = !media.addedToPlaylist;
 
-    if (isExist) {
-      commit(REMOVE, id);
+      await dispatch(
+        `common/${NOTIFY}`,
+        {
+          type: "success",
+          overrides: {
+            message: media.__state.addedToPlaylist
+              ? "REMOVED_FROM_PLAYLIST"
+              : "ADDED_TO_PLAYLIST"
+          }
+        },
+        { root: true }
+      );
     } else {
-      commit(ADD, media);
+      error(_id + " is not registered to 'player' store!");
     }
-
-    await dispatch(
-      `common/${NOTIFY}`,
-      {
-        type: "success",
-        overrides: {
-          message: isExist ? "REMOVED_FROM_PLAYLIST" : "ADDED_TO_PLAYLIST"
-        }
-      },
-      { root: true }
-    );
   }
 };

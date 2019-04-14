@@ -1,3 +1,4 @@
-export const ADD = "ADD";
-export const REMOVE = "REMOVE";
-export const TOGGLE = "TOGGLE";
+export const REGISTER = "REGISTER";
+export const TOGGLE_FROM_PLAYLIST = "TOGGLE_FROM_PLAYLIST";
+export const UPDATE_STATUS = "UPDATE_STATUS";
+export const UPDATE_CURRENT = "UPDATE_CURRENT";

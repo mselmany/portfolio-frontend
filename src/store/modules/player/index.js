@@ -5,8 +5,9 @@ import mutations from "./mutations";
 export default {
   namespaced: true,
   state: {
-    list: [],
-    current: null
+    all: [],
+    playlist: [],
+    current: {}
   },
   getters,
   actions,

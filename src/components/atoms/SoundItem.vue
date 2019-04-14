@@ -31,7 +31,7 @@
 				<div class="Sound__Button" @click="addToPlaylist();">
 					<div
 						class="Icon __mode-contain __actions __black"
-						:class="data.__state.liked ? '__toggleToPlaylist': '__addToPlaylist'"
+						:class="data.__state.addedToPlaylist ? '__toggleToPlaylist': '__addToPlaylist'"
 					></div>
 				</div>
 				<span class="Utils--tabular">{{formattedCurrentTime}}∙{{formattedDuration}}</span>
@@ -48,8 +48,13 @@
 
 <script>
 import { formatTime, raf, generateId } from "@/helpers/utils";
-import { mapActions, mapState } from "vuex";
-import { ADD, REMOVE, TOGGLE } from "@/store/modules/player/types";
+import { mapActions, mapMutations, mapState } from "vuex";
+import {
+	TOGGLE_FROM_PLAYLIST,
+	REGISTER,
+	UPDATE_STATUS,
+	UPDATE_CURRENT
+} from "@/store/modules/player/types";
 
 export default {
 	name: "SoundItem",
@@ -68,7 +73,7 @@ export default {
 		}
 	},
 	computed: {
-		...mapState("player", ["list"]),
+		...mapState("player", ["all", "current"]),
 		formattedCurrentTime() {
 			return formatTime(this.data.__state.currentTime);
 		},
@@ -83,13 +88,15 @@ export default {
 		const audio = this.$refs.audio;
 
 		this.init();
-		if (this.list.length < 15) {
+		if (this.all.length < 15) {
 			this.addToPlaylist();
 		}
 
 		audio.addEventListener("loadedmetadata", () => {
 			let { duration } = audio;
 			this.data.__state.duration = duration;
+
+			this[UPDATE_STATUS]({ duration });
 
 			if (this.actions.onLoad) {
 				this.actions.onLoad(this.data.__state);
@@ -100,6 +107,8 @@ export default {
 			let { volume, muted } = audio;
 			this.data.__state.volume = volume;
 			this.data.__state.muted = muted;
+
+			this[UPDATE_STATUS]({ volume, muted });
 
 			if (this.actions.onVolumeChange) {
 				this.actions.onVolumeChange(this.data.__state);
@@ -112,12 +121,25 @@ export default {
 				this.data.__state.duration = duration;
 			}
 			this.data.__state.currentTime = currentTime;
-			this.data.__state.percentage = Math.floor((currentTime / duration) * 100);
-			this.data.__state.playing = !(paused || ended);
+			let percentage = (this.data.__state.percentage = Math.floor(
+				(currentTime / duration) * 100
+			));
+			let playing = (this.data.__state.playing = !(paused || ended));
+
+			this[UPDATE_STATUS]({ duration, currentTime, percentage, playing });
 
 			if (this.actions.onTimeUpdate) {
 				this.actions.onTimeUpdate(this.data.__state);
 			}
+		});
+
+		audio.addEventListener("play", () => {
+			console.log("play");
+			this[UPDATE_CURRENT](this.data.id);
+		});
+		audio.addEventListener("pause", () => {
+			console.log("pause");
+			this[UPDATE_STATUS]({ playing: false });
 		});
 
 		// TODO@3: Progressbar mouse sürükle-bırak ile ileri-geri sarılabilmeli.
@@ -127,14 +149,19 @@ export default {
 		this.pause();
 	},
 	methods: {
-		...mapActions("player", [TOGGLE]),
+		// ...mapActions("player", [TOGGLE_FROM_PLAYLIST]),
+		...mapMutations("player", [
+			REGISTER,
+			UPDATE_STATUS,
+			UPDATE_CURRENT,
+			TOGGLE_FROM_PLAYLIST
+		]),
 		init() {
 			const audio = this.$refs.audio;
 
 			if (!this.data.__state.initialized) {
 				this.data.__state = {
 					...this.data.__state,
-					id: generateId(),
 					initialized: true,
 					playing: false,
 					duration: 0,
@@ -142,7 +169,7 @@ export default {
 					percentage: 0,
 					volume: audio.volume || 1,
 					muted: audio.muted || false,
-					liked: false
+					addedToPlaylist: false
 				};
 			} else {
 				const {
@@ -154,38 +181,38 @@ export default {
 				audio.volume = volume;
 				audio.muted = muted;
 			}
-		},
-		addToPlaylist() {
-			const { type, permalink, title, label, artwork } = this.data;
 
-			this.data.__state.liked = !this.data.__state.liked;
-
-			this[TOGGLE]({
-				id: this.data.__state.id,
-				type,
-				source: this.$refs.audio,
-				actions: {
-					playPause: this.playPause,
-					changeVolume: this.changeVolume,
-					updateProgressbar: this.updateProgressbar
+			this[REGISTER]({
+				id: this.data.id, // id yi bi üst componentte ver!!!!!
+				type: "sound",
+				source: audio,
+				meta: {
+					title: this.data.title,
+					label: this.data.label
 				},
-				meta: { permalink, title, label, artwork }
+				__state: { ...this.data.__state }
 			});
 		},
+		addToPlaylist() {
+			this[TOGGLE_FROM_PLAYLIST](this.data.id);
+		},
 		updateProgressbar(event) {
-			const audio = this.$refs.audio,
-				progressBar = this.$refs.progressBar;
-
 			raf(() => {
+				const audio = this.$refs.audio,
+					progressBar = this.$refs.progressBar;
+
 				const pos =
 					(event.pageX - progressBar.getBoundingClientRect().left) /
 					progressBar.offsetWidth;
-				audio.currentTime = pos * audio.duration;
-			});
 
-			if (this.actions.onProgressChange) {
-				this.actions.onProgressChange(this.data.__state);
-			}
+				audio.currentTime = pos * audio.duration;
+
+				this[UPDATE_STATUS]({ currentTime: audio.currentTime });
+
+				if (this.actions.onProgressChange) {
+					this.actions.onProgressChange(this.data.__state);
+				}
+			});
 		},
 		playPause() {
 			const audio = this.$refs.audio;
