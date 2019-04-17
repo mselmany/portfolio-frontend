@@ -4,10 +4,10 @@ import { error } from "@/helpers/utils";
 
 export default {
   async [TOGGLE_FROM_PLAYLIST](
-    { dispatch, commit, getters },
+    { dispatch, commit, state },
     _id = error("'id' is missing!")
   ) {
-    let media = getters.getMedia(_id);
+    let media = state.all[_id];
     if (media) {
       commit(TOGGLE_FROM_PLAYLIST, _id);
       // media.addedToPlaylist = !media.addedToPlaylist;

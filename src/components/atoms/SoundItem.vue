@@ -1,22 +1,22 @@
 <template>
 	<figure class="Sound">
 		<audio ref="audio" preload="metadata" :src="data.src"></audio>
-		<div class="Sound__Player" :class="{'Sound__Player--touched': data.__state.playing}">
+		<div class="Sound__Player" :class="{'Sound__Player--touched': status.playing}">
 			<img
 				class="Sound__Artwork"
 				draggable="false"
 				@click="playPause()"
 				:src="data.artwork"
-				:style="{'transform': `rotate(${(data.__state.currentTime % 360) * 2.5}deg) translateZ(0)`}"
+				:style="{'transform': `rotate(${(status.currentTime % 360) * 2.5}deg) translateZ(0)`}"
 			>
 			<div
 				class="Sound__Progress"
 				ref="progressBar"
 				@click="updateProgressbar"
-				v-if="data.__state.currentTime > 0"
+				v-if="status.currentTime > 0"
 			>
 				<div class="Sound__ProgressRail">
-					<div class="Sound__ProgressStatus" :style="{'width': data.__state.percentage + '%'}"></div>
+					<div class="Sound__ProgressStatus" :style="{'width': status.percentage + '%'}"></div>
 				</div>
 			</div>
 		</div>
@@ -25,13 +25,13 @@
 				<div class="Sound__Button" @click="playPause()">
 					<div
 						class="Icon __mode-contain __actions __black"
-						:class="data.__state.playing ? '__pause': '__play'"
+						:class="status.playing ? '__pause': '__play'"
 					></div>
 				</div>
 				<div class="Sound__Button" @click="addToPlaylist();">
 					<div
 						class="Icon __mode-contain __actions __black"
-						:class="data.__state.addedToPlaylist ? '__toggleToPlaylist': '__addToPlaylist'"
+						:class="status.addedToPlaylist ? '__toggleToPlaylist': '__addToPlaylist'"
 					></div>
 				</div>
 				<span class="Utils--tabular">{{formattedCurrentTime}}∙{{formattedDuration}}</span>
@@ -48,7 +48,7 @@
 
 <script>
 import { formatTime, raf, generateId } from "@/helpers/utils";
-import { mapActions, mapMutations, mapState } from "vuex";
+import { mapActions, mapMutations, mapState, mapGetters } from "vuex";
 import {
 	TOGGLE_FROM_PLAYLIST,
 	REGISTER,
@@ -73,7 +73,11 @@ export default {
 		}
 	},
 	computed: {
-		...mapState("player", ["all", "current"]),
+		...mapState("player", ["all"]),
+		...mapGetters("player", ["getMedia"]),
+		status() {
+			return this.getMedia(this.data.id).__state;
+		},
 		formattedCurrentTime() {
 			return formatTime(this.data.__state.currentTime);
 		},
@@ -83,63 +87,81 @@ export default {
 	},
 	created() {
 		this.actions.playPause = this.playPause;
+		this[REGISTER]({
+			id: this.data.id, // id yi bi üst componentte ver!!!!!
+			type: "sound",
+			source: null,
+			meta: {
+				title: this.data.title,
+				label: this.data.label
+			},
+			__state: {
+				initialized: true,
+				playing: false,
+				duration: 0,
+				currentTime: 0,
+				percentage: 0,
+				volume: 1,
+				muted: false,
+				addedToPlaylist: false
+			}
+		});
 	},
 	mounted() {
 		const audio = this.$refs.audio;
 
 		this.init();
-		if (this.all.length < 15) {
+		if (Object.keys(this.all).length < 15) {
 			this.addToPlaylist();
 		}
 
 		audio.addEventListener("loadedmetadata", () => {
 			let { duration } = audio;
-			this.data.__state.duration = duration;
 
 			this[UPDATE_STATUS]({ duration });
 
 			if (this.actions.onLoad) {
-				this.actions.onLoad(this.data.__state);
+				this.actions.onLoad(this.status);
 			}
 		});
 
 		audio.addEventListener("volumechange", () => {
 			let { volume, muted } = audio;
-			this.data.__state.volume = volume;
-			this.data.__state.muted = muted;
 
 			this[UPDATE_STATUS]({ volume, muted });
 
 			if (this.actions.onVolumeChange) {
-				this.actions.onVolumeChange(this.data.__state);
+				this.actions.onVolumeChange(this.status);
 			}
 		});
 
 		audio.addEventListener("timeupdate", () => {
 			let { duration, currentTime, paused, ended } = audio;
-			if (this.data.__state.duration === 0) {
-				this.data.__state.duration = duration;
-			}
-			this.data.__state.currentTime = currentTime;
-			let percentage = (this.data.__state.percentage = Math.floor(
-				(currentTime / duration) * 100
-			));
-			let playing = (this.data.__state.playing = !(paused || ended));
+			let percentage = Math.floor((currentTime / duration) * 100);
+			let playing = !(paused || ended);
 
 			this[UPDATE_STATUS]({ duration, currentTime, percentage, playing });
 
 			if (this.actions.onTimeUpdate) {
-				this.actions.onTimeUpdate(this.data.__state);
+				this.actions.onTimeUpdate(this.status);
 			}
 		});
 
 		audio.addEventListener("play", () => {
-			console.log("play");
-			this[UPDATE_CURRENT](this.data.id);
-		});
-		audio.addEventListener("pause", () => {
-			console.log("pause");
 			this[UPDATE_STATUS]({ playing: false });
+			this[UPDATE_CURRENT](this.data.id);
+
+			if (this.actions.onPlayStateChange) {
+				this.actions.onPlayStateChange(this.status);
+			}
+		});
+
+		audio.addEventListener("pause", () => {
+			this[UPDATE_STATUS]({ playing: false });
+
+			if (this.actions.onPlayStateChange) {
+				this.actions.onPlayStateChange(this.status);
+			}
 		});
 
 		// TODO@3: Progressbar mouse sürükle-bırak ile ileri-geri sarılabilmeli.
@@ -159,9 +181,16 @@ export default {
 		init() {
 			const audio = this.$refs.audio;
 
-			if (!this.data.__state.initialized) {
-				this.data.__state = {
-					...this.data.__state,
+			this[REGISTER]({
+				override: true,
+				id: this.data.id, // id yi bi üst componentte ver!!!!!
+				type: "sound",
+				source: audio,
+				meta: {
+					title: this.data.title,
+					label: this.data.label
+				},
+				__state: {
 					initialized: true,
 					playing: false,
 					duration: 0,
@@ -170,27 +199,7 @@ export default {
 					volume: audio.volume || 1,
 					muted: audio.muted || false,
 					addedToPlaylist: false
-				};
-			} else {
-				const {
-					currentTime = 0,
-					volume = 1,
-					muted = false
-				} = this.data.__state;
-				audio.currentTime = currentTime;
-				audio.volume = volume;
-				audio.muted = muted;
-			}
-
-			this[REGISTER]({
-				id: this.data.id, // id yi bi üst componentte ver!!!!!
-				type: "sound",
-				source: audio,
-				meta: {
-					title: this.data.title,
-					label: this.data.label
-				},
-				__state: { ...this.data.__state }
+				}
 			});
 		},
 		addToPlaylist() {
@@ -210,7 +219,7 @@ export default {
 				this[UPDATE_STATUS]({ currentTime: audio.currentTime });
 
 				if (this.actions.onProgressChange) {
-					this.actions.onProgressChange(this.data.__state);
+					this.actions.onProgressChange(this.status);
 				}
 			});
 		},
@@ -221,17 +230,11 @@ export default {
 			} else {
 				this.pause();
 			}
-
-			if (this.actions.onPlayStateChange) {
-				this.actions.onPlayStateChange(this.data.__state);
-			}
 		},
 		play() {
-			this.data.__state.playing = true;
 			this.$refs.audio.play();
 		},
 		pause() {
-			this.data.__state.playing = false;
 			this.$refs.audio.pause();
 		},
 		changeVolume() {

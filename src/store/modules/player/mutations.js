@@ -2,7 +2,8 @@ import {
   REGISTER,
   TOGGLE_FROM_PLAYLIST,
   UPDATE_STATUS,
-  UPDATE_CURRENT
+  UPDATE_CURRENT,
+  CREATE_AUDIO
 } from "./types";
 import { error } from "@/helpers/utils";
 
@@ -14,13 +15,16 @@ export default {
       type = error("'type' is missing!"),
       source = error("'source' is missing!"),
       meta = error("'meta' is missing!"),
-      __state = {}
+      __state = {},
+      override = false
     }
   ) {
-    state.all = [...state.all, { id, type, source, meta, __state }];
+    if (!state.all.hasOwnProperty(id) || override) {
+      state.all[id] = { id, type, source, meta, __state };
+    }
   },
   [TOGGLE_FROM_PLAYLIST](state, _id = error("'id' is missing!")) {
-    let media = state.all.find(({ id }) => id === _id);
+    let media = state.all[_id];
     if (media.__state.addedToPlaylist) {
       state.playlist = state.playlist.filter(({ id }) => id !== _id);
     } else {
@@ -32,7 +36,7 @@ export default {
     if (state.current && state.current.id !== _id) {
       state.current.source && state.current.source.pause();
     }
-    state.current = state.all.find(({ id }) => id === _id);
+    state.current = state.all[_id];
   },
   [UPDATE_STATUS](state, status) {
     state.current.__state = { ...state.current.__state, ...status };
