@@ -19,7 +19,7 @@
 			<li class="_Item __notification" v-for="(item, index) in notifications.list" :key="index">
 				<div class="_Icon Icon" :class="[item.icon]"></div>
 				<span class="_Title" v-if="item.title.length">{{$t(item.title)}}</span>
-				<span class="_Message" v-if="item.title.length">{{$t(item.message)}}</span>
+				<span class="_Message" v-if="item.message.length">{{$t(item.message, item.parameters)}}</span>
 			</li>
 			<li class="_Item __loading" v-if="loading.pending">
 				<div class="_Icon Icon" :class="[loading.icon]"></div>
@@ -90,8 +90,8 @@ export default {
 			en: "Instagram"
 		},
 		LOADING_MESSAGE: {
-			tr: "Veri yükleniyor...",
-			en: "Data loading..."
+			tr: "Yükleniyor...",
+			en: "Loading..."
 		},
 		ERROR_MESSAGE: {
 			tr: "İstenmeyen bir durum meydana geldi.",
@@ -158,12 +158,12 @@ export default {
 			en: "Hide notifications"
 		},
 		ADDED_TO_PLAYLIST: {
-			tr: "Oynatma listesine eklendi.",
-			en: "Added to playlist."
+			tr: "'$0' oynatma listesine eklendi.",
+			en: "'$0' added to playlist."
 		},
 		REMOVED_FROM_PLAYLIST: {
-			tr: "Oynatma listesinden kaldırıldı.",
-			en: "Removed from playlist."
+			tr: "'$0' oynatma listesinden kaldırıldı.",
+			en: "'$0' removed from playlist."
 		}
 	},
 	computed: {
@@ -184,13 +184,13 @@ export default {
 .Notification {
 	--BackgroundColor: var(--DefaultColor);
 	--Color: var(--DefaultBackgroundColor);
-	font-size: 1rem;
+	font-size: 0.85rem;
 	text-align: left;
 	min-width: 8em;
 	max-width: 20em;
 	position: fixed;
-	bottom: 0;
-	left: 0;
+	bottom: 0.5rem;
+	left: 0.5rem;
 	z-index: 9000;
 	user-select: none;
 
@@ -211,7 +211,7 @@ export default {
 	}
 
 	& .__container {
-		font-size: 1rem;
+		font-size: 1em;
 		padding: 0.75em;
 		padding-right: 1.25em;
 		display: none;
@@ -265,6 +265,7 @@ export default {
 	}
 	& ._Message {
 		padding-left: 2.5rem;
+		display: inline-block;
 	}
 }
 </style>

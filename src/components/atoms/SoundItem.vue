@@ -1,22 +1,22 @@
 <template>
 	<figure class="Sound">
-		<audio ref="audio" preload="metadata" :src="data.src"></audio>
-		<div class="Sound__Player" :class="{'Sound__Player--touched': status.playing}">
-			<img
+		<!-- <audio ref="audio" preload="metadata" :src="data.src"></audio> -->
+		<div class="Sound__Player" :class="{'Sound__Player--touched': media.__state.playing}">
+			<div
 				class="Sound__Artwork"
-				draggable="false"
 				@click="playPause()"
-				:src="data.artwork"
-				:style="{'transform': `rotate(${(status.currentTime % 360) * 2.5}deg) translateZ(0)`}"
+				:style="{'transform': `rotate(${(media.__state.currentTime % 360) * 2.5}deg) translateZ(0)`}"
 			>
+				<img draggable="false" :src="data.artwork">
+			</div>
 			<div
 				class="Sound__Progress"
 				ref="progressBar"
 				@click="updateProgressbar"
-				v-if="status.currentTime > 0"
+				v-if="media.__state.currentTime > 0"
 			>
 				<div class="Sound__ProgressRail">
-					<div class="Sound__ProgressStatus" :style="{'width': status.percentage + '%'}"></div>
+					<div class="Sound__ProgressStatus" :style="{'width': media.__state.percentage + '%'}"></div>
 				</div>
 			</div>
 		</div>
@@ -25,16 +25,18 @@
 				<div class="Sound__Button" @click="playPause()">
 					<div
 						class="Icon __mode-contain __actions __black"
-						:class="status.playing ? '__pause': '__play'"
+						:class="media.__state.playing ? '__pause': '__play'"
 					></div>
 				</div>
 				<div class="Sound__Button" @click="addToPlaylist();">
 					<div
 						class="Icon __mode-contain __actions __black"
-						:class="status.addedToPlaylist ? '__toggleToPlaylist': '__addToPlaylist'"
+						:class="media.__state.addedToPlaylist ? '__toggleToPlaylist': '__addToPlaylist'"
 					></div>
 				</div>
-				<span class="Utils--tabular">{{formattedCurrentTime}}∙{{formattedDuration}}</span>
+				<span
+					class="Utils--tabular"
+				>{{media.__state.formattedCurrentTime}}∙{{media.__state.formattedDuration}}</span>
 			</div>
 			<div class="Sound__Title __oneLine" v-if="data.title">
 				<span>{{data.title}}</span>
@@ -47,7 +49,8 @@
 </template>
 
 <script>
-import { formatTime, raf, generateId } from "@/helpers/utils";
+import { formatTime, raf, generateId, error } from "@/helpers/utils";
+import { updateProgressbar, changeVolume, playPause } from "@/helpers/media";
 import { mapActions, mapMutations, mapState, mapGetters } from "vuex";
 import {
 	TOGGLE_FROM_PLAYLIST,
@@ -61,192 +64,56 @@ export default {
 	props: {
 		data: {
 			type: Object,
-			required: true,
-			default: () => ({ __state: {} })
-		},
-		state: {
-			type: Object
-		},
-		actions: {
-			type: Object,
-			default: () => ({})
+			required: true
 		}
 	},
+	data() {
+		return {
+			id: this.data.id
+		};
+	},
 	computed: {
-		...mapState("player", ["all"]),
 		...mapGetters("player", ["getMedia"]),
-		status() {
-			return this.getMedia(this.data.id).__state;
-		},
-		formattedCurrentTime() {
-			return formatTime(this.data.__state.currentTime);
-		},
-		formattedDuration() {
-			return formatTime(this.data.__state.duration);
+		media() {
+			return this.getMedia(this.id);
 		}
 	},
 	created() {
-		this.actions.playPause = this.playPause;
 		this[REGISTER]({
-			id: this.data.id, // id yi bi üst componentte ver!!!!!
+			id: this.id,
 			type: "sound",
-			source: null,
+			src: this.data.src,
 			meta: {
 				title: this.data.title,
 				label: this.data.label
-			},
-			__state: {
-				initialized: true,
-				playing: false,
-				duration: 0,
-				currentTime: 0,
-				percentage: 0,
-				volume: 1,
-				muted: false,
-				addedToPlaylist: false
 			}
 		});
-	},
-	mounted() {
-		const audio = this.$refs.audio;
-
-		this.init();
-		if (Object.keys(this.all).length < 15) {
-			this.addToPlaylist();
-		}
-
-		audio.addEventListener("loadedmetadata", () => {
-			let { duration } = audio;
-
-			this[UPDATE_STATUS]({ duration });
-
-			if (this.actions.onLoad) {
-				this.actions.onLoad(this.status);
-			}
-		});
-
-		audio.addEventListener("volumechange", () => {
-			let { volume, muted } = audio;
-
-			this[UPDATE_STATUS]({ volume, muted });
-
-			if (this.actions.onVolumeChange) {
-				this.actions.onVolumeChange(this.status);
-			}
-		});
-
-		audio.addEventListener("timeupdate", () => {
-			let { duration, currentTime, paused, ended } = audio;
-			let percentage = Math.floor((currentTime / duration) * 100);
-			let playing = !(paused || ended);
-
-			this[UPDATE_STATUS]({ duration, currentTime, percentage, playing });
-
-			if (this.actions.onTimeUpdate) {
-				this.actions.onTimeUpdate(this.status);
-			}
-		});
-
-		audio.addEventListener("play", () => {
-			this[UPDATE_STATUS]({ playing: false });
-			this[UPDATE_CURRENT](this.data.id);
-
-			if (this.actions.onPlayStateChange) {
-				this.actions.onPlayStateChange(this.status);
-			}
-		});
-
-		audio.addEventListener("pause", () => {
-			this[UPDATE_STATUS]({ playing: false });
-
-			if (this.actions.onPlayStateChange) {
-				this.actions.onPlayStateChange(this.status);
-			}
-		});
-
 		// TODO@3: Progressbar mouse sürükle-bırak ile ileri-geri sarılabilmeli.
 		// TODO@3: Float/pin halindeki mediayı(audio) resize edilebilir yap.
 	},
 	beforeDestroy() {
-		this.pause();
+		this.media.source.pause();
 	},
 	methods: {
-		// ...mapActions("player", [TOGGLE_FROM_PLAYLIST]),
-		...mapMutations("player", [
-			REGISTER,
-			UPDATE_STATUS,
-			UPDATE_CURRENT,
-			TOGGLE_FROM_PLAYLIST
-		]),
-		init() {
-			const audio = this.$refs.audio;
-
-			this[REGISTER]({
-				override: true,
-				id: this.data.id, // id yi bi üst componentte ver!!!!!
-				type: "sound",
-				source: audio,
-				meta: {
-					title: this.data.title,
-					label: this.data.label
-				},
-				__state: {
-					initialized: true,
-					playing: false,
-					duration: 0,
-					currentTime: 0,
-					percentage: 0,
-					volume: audio.volume || 1,
-					muted: audio.muted || false,
-					addedToPlaylist: false
-				}
-			});
-		},
+		...mapActions("player", [REGISTER, TOGGLE_FROM_PLAYLIST]),
 		addToPlaylist() {
-			this[TOGGLE_FROM_PLAYLIST](this.data.id);
+			this[TOGGLE_FROM_PLAYLIST](this.id);
 		},
 		updateProgressbar(event) {
-			raf(() => {
-				const audio = this.$refs.audio,
-					progressBar = this.$refs.progressBar;
-
-				const pos =
-					(event.pageX - progressBar.getBoundingClientRect().left) /
-					progressBar.offsetWidth;
-
-				audio.currentTime = pos * audio.duration;
-
-				this[UPDATE_STATUS]({ currentTime: audio.currentTime });
-
-				if (this.actions.onProgressChange) {
-					this.actions.onProgressChange(this.status);
-				}
+			updateProgressbar({
+				event,
+				source: this.media.source,
+				progressBar: this.$refs.progressBar
 			});
 		},
 		playPause() {
-			const audio = this.$refs.audio;
-			if (audio.paused || audio.ended) {
-				this.play();
-			} else {
-				this.pause();
-			}
-		},
-		play() {
-			this.$refs.audio.play();
-		},
-		pause() {
-			this.$refs.audio.pause();
+			playPause(this.media.source);
+			setTimeout(() => {
+				this.$emit("playPause", this.media);
+			});
 		},
 		changeVolume() {
-			const audio = this.$refs.audio;
-			if (audio.muted) {
-				audio.muted = false;
-			} else if (audio.volume <= 0.5) {
-				audio.volume = 1;
-			} else if (!audio.muted) {
-				audio.muted = true;
-				audio.volume = 0.5;
-			}
+			changeVolume(this.media.source);
 		},
 		disableStickyAndScroll() {
 			if (this.actions.sticky) {
@@ -254,17 +121,9 @@ export default {
 			}
 		},
 		disableStickyAndPause() {
-			this.pause();
-			if (this.actions.fullscreen && this.actions.fullscreen.active) {
-				this.toggleFullscreen();
-			}
+			this.media.source.pause();
 			if (this.actions.sticky && this.actions.sticky.active) {
 				this.actions.sticky.disable();
-			}
-		},
-		toggleFullscreen() {
-			if (this.actions.fullscreen) {
-				this.actions.fullscreen.toggle();
 			}
 		}
 	}
@@ -318,6 +177,35 @@ export default {
 		transition: 0.1s linear;
 		will-change: transform;
 		cursor: pointer;
+
+		& > img {
+			width: 100%;
+			height: 100%;
+		}
+		/*
+		&::before,
+		&::after {
+			content: "";
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background-color: var(--Color);
+			border-radius: 50%;
+		}
+
+		&::before {
+			width: 2rem;
+			height: 2rem;
+			z-index: 1;
+			opacity: 0.75;
+		}
+		&::after {
+			width: 1rem;
+			height: 1rem;
+			z-index: 2;
+			box-shadow: 0 0 3px 0 #ccc inset;
+		} */
 	}
 
 	& .Sound__Progress {

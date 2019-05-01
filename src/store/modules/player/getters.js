@@ -1,5 +1,5 @@
 export default {
   getMedia({ all }) {
-    return _id => all[_id];
+    return id => all[id];
   }
 };

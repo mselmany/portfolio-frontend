@@ -3,7 +3,7 @@
 		<MetaInfo :meta="meta"/>
 		<!-- <div class="_Title" v-html="media.title"></div> -->
 		<!-- <Media v-if="!!media" :list="[media]"/> -->
-		<SoundItem :data="media"/>
+		<SoundItem :data="media" @playPause="deneme"/>
 	</div>
 </template>
 
@@ -44,6 +44,11 @@ export default {
 				}
 			}
 		};
+	},
+	methods: {
+		deneme(d) {
+			console.log("dd: ", d);
+		}
 	}
 };
 </script>

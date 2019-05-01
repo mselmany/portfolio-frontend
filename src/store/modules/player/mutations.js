@@ -2,10 +2,10 @@ import {
   REGISTER,
   TOGGLE_FROM_PLAYLIST,
   UPDATE_STATUS,
-  UPDATE_CURRENT,
-  CREATE_AUDIO
+  UPDATE_CURRENT
 } from "./types";
-import { error } from "@/helpers/utils";
+import { error, formatTime } from "@/helpers/utils";
+import Vue from "vue";
 
 export default {
   [REGISTER](
@@ -15,12 +15,29 @@ export default {
       type = error("'type' is missing!"),
       source = error("'source' is missing!"),
       meta = error("'meta' is missing!"),
-      __state = {},
-      override = false
+      __state
     }
   ) {
-    if (!state.all.hasOwnProperty(id) || override) {
-      state.all[id] = { id, type, source, meta, __state };
+    if (!state.all.hasOwnProperty(id)) {
+      state.all[id] = Vue.observable({
+        id,
+        type,
+        source,
+        meta,
+        __state: {
+          initialized: false,
+          playing: false,
+          duration: 0,
+          formattedDuration: "00:00",
+          currentTime: 0,
+          formattedCurrentTime: "00:00",
+          percentage: 0,
+          volume: 1,
+          muted: false,
+          addedToPlaylist: false,
+          ...__state
+        }
+      });
     }
   },
   [TOGGLE_FROM_PLAYLIST](state, _id = error("'id' is missing!")) {
@@ -39,6 +56,18 @@ export default {
     state.current = state.all[_id];
   },
   [UPDATE_STATUS](state, status) {
-    state.current.__state = { ...state.current.__state, ...status };
+    let { id = null, duration = null, currentTime = null } = status;
+    if (duration !== null) {
+      status.formattedDuration = formatTime(duration);
+    }
+    if (currentTime !== null) {
+      status.formattedCurrentTime = formatTime(currentTime);
+    }
+
+    if (id !== null) {
+      state.all[id].__state = { ...state.all[id].__state, ...status };
+    } else {
+      state.current.__state = { ...state.current.__state, ...status };
+    }
   }
 };
