@@ -14,6 +14,7 @@ import SocialList from "./SocialList";
 import LoaderButton from "./LoaderButton";
 import Notification from "./Notification";
 import InfiniteLoader from "./InfiniteLoader";
+import Player from "./Player";
 
 const socialitems = {
   Dribbble,
@@ -31,7 +32,8 @@ const components = {
   SocialList,
   LoaderButton,
   Notification,
-  InfiniteLoader
+  InfiniteLoader,
+  Player
 };
 
 Object.values(components).forEach(component => {

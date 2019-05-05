@@ -3,12 +3,6 @@ adds [fullscreen-element][fullscreen-active] attributes to itself
 creates new [fullscreen-placeholder] element as it's next sibling
 
 {
-  onEnable: context => {
-    console.log("onEnable", context);
-  },
-  onDisable: context => {
-    console.log("onDisable", context);
-  },
   onChange: context => {
     console.log("onChange", context);
   },
@@ -33,14 +27,14 @@ export default {
 
       el.$fullscreen = {};
 
-      el.$fullscreen.setPlaceholder = () => {
-        raf(_setPlaceholderSync);
-      };
-
       const _setPlaceholderSync = () => {
         const ph = vnode.context.$fullscreen.placeholder;
         ph.style.width = window.getComputedStyle(el).width;
         ph.style.height = window.getComputedStyle(el).height;
+      };
+
+      el.$fullscreen.setPlaceholder = () => {
+        raf(_setPlaceholderSync);
       };
 
       const enable = callback => {
@@ -55,8 +49,9 @@ export default {
             e.preventDefault();
             const key = e.keyCode || e.which;
 
-            options.onKeydown &&
+            if (options.onKeydown && options.onKeydown instanceof Function) {
               options.onKeydown(key, vnode.context.$fullscreen);
+            }
           };
 
           window.addEventListener("keydown", el.$fullscreen.onKeydown, false);
@@ -74,7 +69,9 @@ export default {
           window.addEventListener("scroll", el.$fullscreen.onScroll, false);
         }
 
-        options.onEnable && options.onEnable(vnode.context.$fullscreen);
+        if (options.onChange && options.onChange instanceof Function) {
+          options.onChange(vnode.context.$fullscreen);
+        }
 
         if (callback && callback instanceof Function) {
           callback();
@@ -84,7 +81,7 @@ export default {
       const disable = callback => {
         vnode.context.$fullscreen.active = false;
 
-        el.removeAttribute("fullscreen-active", "");
+        el.removeAttribute("fullscreen-active");
 
         // remove listeners on fullscreen exit
         if (el.$fullscreen.onKeydown) {
@@ -106,7 +103,9 @@ export default {
           delete el.$fullscreen.onScroll;
         }
 
-        options.onDisable && options.onDisable(vnode.context.$fullscreen);
+        if (options.onChange && options.onChange instanceof Function) {
+          options.onChange(vnode.context.$fullscreen);
+        }
 
         if (callback && callback instanceof Function) {
           callback();
@@ -119,7 +118,6 @@ export default {
         } else {
           enable();
         }
-        options.onChange && options.onChange(vnode.context.$fullscreen);
       };
 
       vnode.context.$fullscreen = {

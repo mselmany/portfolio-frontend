@@ -4,7 +4,8 @@ html {
   color: var(--DefaultColor);
   font-family: var(--DefaultFontFamily);
   font-size: 16px;
-  font-size: responsive;
+  /* font-size: responsive; */
+  font-size: calc(10px + 9 * ((100vw - 420px) / 860));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;

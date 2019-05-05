@@ -5,6 +5,7 @@ import common from "./modules/common";
 import toolbox from "./modules/toolbox";
 import filterlist from "./modules/filterlist";
 import sociallist from "./modules/sociallist";
+import player from "./modules/player";
 
 Vue.use(Vuex);
 
@@ -14,7 +15,8 @@ const modules = {
   common,
   toolbox,
   filterlist,
-  sociallist
+  sociallist,
+  player
 };
 
 const store = new Vuex.Store({

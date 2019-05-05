@@ -11,11 +11,11 @@
 			</video>
 			<div class="_Controls">
 				<div class="_Layer __topLeft">
-					<div v-if="state.sticky.active" class="_Item __Hover" @click="disableStickyAndScroll()">
+					<div v-if="state.sticky.direction" class="_Item __Hover" @click="disableStickyAndScroll()">
 						<div class="_Icon Icon __white __pin"></div>
 					</div>
 					<div
-						v-if="state.sticky.active || state.fullscreen.active"
+						v-if="state.sticky.direction || state.fullscreen.active"
 						class="_Item __Hover"
 						@click="disableStickyAndPause()"
 					>
@@ -43,7 +43,7 @@
 					<div class="_Panel">
 						<div class="_Item">{{formattedCurrentTime}} ∙ {{formattedDuration}}</div>
 					</div>
-					<div class="_ProgressBar" ref="progressBar">
+					<div class="_ProgressBar" ref="progressBar" @click="updateProgressbar">
 						<div class="_Progress">
 							<div class="_Indicator" :style="{'width': data.__state.percentage + '%'}"></div>
 						</div>
@@ -55,78 +55,24 @@
 </template>
 
 <script>
-import { formatTime } from "@/helpers/utils";
+import { formatTime, raf } from "@/helpers/utils";
+import { updateProgressbar, changeVolume, playPause } from "@/helpers/media";
 
 export default {
 	name: "VideoItem",
 	props: {
 		data: {
 			type: Object,
-			required: true
+			required: true,
+			default: () => ({ __state: {} })
 		},
 		state: {
+			type: Object
+		},
+		actions: {
 			type: Object,
-			required: true
-		},
-		toggleFullscreen: {
-			type: Function,
-			default: _ => {}
-		},
-		disableSticky: {
-			type: Function,
-			default: _ => {}
+			default: () => ({})
 		}
-	},
-	mounted() {
-		const video = this.$refs.video,
-			progressBar = this.$refs.progressBar;
-
-		if (!this.data.__state.hasOwnProperty("initialized")) {
-			this.data.__state = {
-				...this.data.__state,
-				initialized: true,
-				playing: false,
-				duration: -1,
-				currentTime: 0,
-				percentage: 0,
-				volume: video.volume,
-				muted: video.muted
-			};
-		}
-		this.data.__state.playPause = this.playPause;
-
-		video.addEventListener("loadedmetadata", () => {
-			let { duration } = video;
-			this.data.__state.duration = duration;
-		});
-
-		video.addEventListener("volumechange", () => {
-			let { volume, muted } = video;
-			this.data.__state.volume = volume;
-			this.data.__state.muted = muted;
-		});
-
-		video.addEventListener("timeupdate", () => {
-			let { duration, currentTime, paused, ended } = video;
-			if (this.data.__state.duration === -1) {
-				this.data.__state.duration = duration;
-			}
-			this.data.__state.currentTime = currentTime;
-			this.data.__state.percentage = Math.floor((currentTime / duration) * 100);
-			this.data.__state.playing = !(paused || ended);
-		});
-
-		progressBar.addEventListener("click", function(e) {
-			const pos =
-				(e.pageX - this.getBoundingClientRect().left) / this.offsetWidth;
-			video.currentTime = pos * video.duration;
-		});
-
-		// TODO@3: Progressbar mouse sürükle-bırak ile ileri-geri sarılabilmeli.
-		// TODO@3: Float/pin halindeki mediayı(video) resize edilebilir yap.
-	},
-	beforeDestroy() {
-		this.pause();
 	},
 	computed: {
 		formattedCurrentTime() {
@@ -136,13 +82,95 @@ export default {
 			return formatTime(this.data.__state.duration);
 		}
 	},
+	created() {
+		this.actions.playPause = this.playPause;
+	},
+	mounted() {
+		const video = this.$refs.video;
+
+		this.init();
+
+		video.addEventListener("loadedmetadata", () => {
+			let { duration } = video;
+			this.data.__state.duration = duration;
+
+			if (this.actions.onLoad) {
+				this.actions.onLoad(this.data.__state);
+			}
+		});
+
+		video.addEventListener("volumechange", () => {
+			let { volume, muted } = video;
+			this.data.__state.volume = volume;
+			this.data.__state.muted = muted;
+
+			if (this.actions.onVolumeChange) {
+				this.actions.onVolumeChange(this.data.__state);
+			}
+		});
+
+		video.addEventListener("timeupdate", () => {
+			let { duration, currentTime, paused, ended } = video;
+			if (this.data.__state.duration === 0) {
+				this.data.__state.duration = duration;
+			}
+			this.data.__state.currentTime = currentTime;
+			this.data.__state.percentage = Math.floor((currentTime / duration) * 100);
+			this.data.__state.playing = !(paused || ended);
+
+			if (this.actions.onTimeUpdate) {
+				this.actions.onTimeUpdate(this.data.__state);
+			}
+		});
+
+		// TODO@3: Progressbar mouse sürükle-bırak ile ileri-geri sarılabilmeli.
+		// TODO@3: Float/pin halindeki mediayı(video) resize edilebilir yap.
+	},
+	beforeDestroy() {
+		this.pause();
+	},
 	methods: {
-		playPause() {
+		init() {
 			const video = this.$refs.video;
-			if (video.paused || video.ended) {
-				this.play();
+
+			if (!this.data.__state.initialized) {
+				this.data.__state = {
+					...this.data.__state,
+					initialized: true,
+					playing: false,
+					duration: 0,
+					currentTime: 0,
+					percentage: 0,
+					volume: video.volume || 1,
+					muted: video.muted || false
+				};
 			} else {
-				this.pause();
+				const {
+					currentTime = 0,
+					volume = 1,
+					muted = false
+				} = this.data.__state;
+				video.currentTime = currentTime;
+				video.volume = volume;
+				video.muted = muted;
+			}
+		},
+		updateProgressbar(event) {
+			updateProgressbar({
+				event,
+				source: this.$refs.video,
+				progressBar: this.$refs.progressBar
+			});
+
+			if (this.actions.onProgressChange) {
+				this.actions.onProgressChange(this.data.__state);
+			}
+		},
+		playPause() {
+			playPause(this.$refs.video);
+
+			if (this.actions.onPlayStateChange) {
+				this.actions.onPlayStateChange(this.data.__state);
 			}
 		},
 		play() {
@@ -154,34 +182,25 @@ export default {
 			this.$refs.video.pause();
 		},
 		changeVolume() {
-			const video = this.$refs.video;
-			if (video.muted) {
-				video.muted = false;
-			} else if (video.volume <= 0.5) {
-				video.volume = 1;
-			} else if (!video.muted) {
-				video.muted = true;
-				video.volume = 0.5;
-			}
+			changeVolume(this.$refs.video);
 		},
 		disableStickyAndScroll() {
-			this.disableSticky(() => {
-				setTimeout(() => {
-					this.$el.scrollIntoView({
-						behavior: "smooth",
-						block: "center",
-						inline: "center"
-					});
-				});
-			});
+			if (this.actions.sticky) {
+				this.actions.sticky.disable({ scrollTo: this.$el });
+			}
 		},
 		disableStickyAndPause() {
 			this.pause();
-			if (this.state.fullscreen.active) {
+			if (this.actions.fullscreen && this.actions.fullscreen.active) {
 				this.toggleFullscreen();
 			}
-			if (this.state.sticky.active) {
-				this.disableSticky();
+			if (this.actions.sticky && this.actions.sticky.active) {
+				this.actions.sticky.disable();
+			}
+		},
+		toggleFullscreen() {
+			if (this.actions.fullscreen) {
+				this.actions.fullscreen.toggle();
 			}
 		}
 	}
