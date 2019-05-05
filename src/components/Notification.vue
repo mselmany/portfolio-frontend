@@ -19,12 +19,16 @@
 			<li class="_Item __notification" v-for="(item, index) in notifications.list" :key="index">
 				<div class="_Icon Icon" :class="[item.icon]"></div>
 				<span class="_Title" v-if="item.title.length">{{$t(item.title)}}</span>
-				<span class="_Message" v-if="item.message.length">{{$t(item.message, item.parameters)}}</span>
+				<span class="_Message" v-if="item.message.length" v-html="$t(item.message, item.parameters)"></span>
 			</li>
 			<li class="_Item __loading" v-if="loading.pending">
 				<div class="_Icon Icon" :class="[loading.icon]"></div>
 				<span class="_Title" v-if="loading.title.length">{{loading.queue.length}} {{$t(loading.title)}}</span>
-				<span class="_Message" v-if="loading.message.length">{{$t(loading.message)}}</span>
+				<span
+					class="_Message"
+					v-if="loading.message.length"
+					v-html="$t(loading.message, loading.parameters)"
+				></span>
 			</li>
 		</ul>
 	</div>
@@ -142,11 +146,11 @@ export default {
 			en: "Photographs fetched."
 		},
 		NOTIFICATION_ENABLED: {
-			tr: "Bildirimler aktif hale getirildi.",
+			tr: "Bildirimler <i>aktif</i> hale getirildi.",
 			en: "Notifications enabled."
 		},
 		NOTIFICATION_DISABLED: {
-			tr: "Bildirimler devre dışı bırakıldı.",
+			tr: "Bildirimler <i>devre dışı</i> bırakıldı.",
 			en: "Notifications disabled."
 		},
 		SHOW_NOTIFICATION: {
@@ -158,12 +162,12 @@ export default {
 			en: "Hide notifications"
 		},
 		ADDED_TO_PLAYLIST: {
-			tr: "'$0' oynatma listesine eklendi.",
-			en: "'$0' added to playlist."
+			tr: "'$0' oynatma listesine <i>eklendi</i>.",
+			en: "'$0' <i>added</i> to playlist."
 		},
 		REMOVED_FROM_PLAYLIST: {
-			tr: "'$0' oynatma listesinden kaldırıldı.",
-			en: "'$0' removed from playlist."
+			tr: "'$0' oynatma listesinden <i>kaldırıldı</i>.",
+			en: "'$0' <i>removed</i> from playlist."
 		}
 	},
 	computed: {
@@ -266,6 +270,9 @@ export default {
 	& ._Message {
 		padding-left: 2.5rem;
 		display: inline-block;
+		& >>> i {
+			font-weight: 500;
+		}
 	}
 }
 </style>

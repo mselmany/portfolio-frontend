@@ -1,13 +1,15 @@
 <template>
-	<div class="Soundcloud" :class="{'__withMedia': !!media}">
+	<div class="Soundcloud" :class="{'__withMedia': !!track}">
 		<MetaInfo :meta="meta"/>
-		<!-- <div class="_Title" v-html="media.title"></div> -->
 		<!-- <Media v-if="!!media" :list="[media]"/> -->
-		<SoundItem :data="media" @playPause="deneme"/>
+		<SoundItem :media="media" @toggleFromPlaylist="toggleFromPlaylist"/>
 	</div>
 </template>
 
 <script>
+import { mapActions, mapGetters } from "vuex";
+import { TOGGLE_FROM_PLAYLIST, REGISTER } from "@/store/modules/player/types";
+
 export default {
 	name: "Soundcloud",
 	props: {
@@ -24,7 +26,7 @@ export default {
 				type: this.data.__source.type,
 				name: this.data.__source.name
 			},
-			media: {
+			track: {
 				__state: {},
 				type: "sound",
 				src:
@@ -45,9 +47,28 @@ export default {
 			}
 		};
 	},
+	computed: {
+		...mapGetters("player", ["getMedia"]),
+		media() {
+			return this.getMedia(this.track.id);
+		}
+	},
+	created() {
+		this[REGISTER]({
+			id: this.track.id,
+			type: this.track.type,
+			src: this.track.src,
+			meta: {
+				artwork: this.track.artwork,
+				title: this.track.title,
+				label: this.track.label
+			}
+		});
+	},
 	methods: {
-		deneme(d) {
-			console.log("dd: ", d);
+		...mapActions("player", [REGISTER, TOGGLE_FROM_PLAYLIST]),
+		toggleFromPlaylist(id) {
+			this[TOGGLE_FROM_PLAYLIST](id);
 		}
 	}
 };

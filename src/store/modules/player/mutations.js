@@ -41,11 +41,14 @@ export default {
     }
   },
   [TOGGLE_FROM_PLAYLIST](state, _id = error("'id' is missing!")) {
+    const isCurrent = state.current && state.current.id === _id;
     let media = state.all[_id];
     if (media.__state.addedToPlaylist) {
       state.playlist = state.playlist.filter(({ id }) => id !== _id);
     } else {
-      state.playlist = [...state.playlist, media];
+      state.playlist = isCurrent
+        ? [media, ...state.playlist]
+        : [...state.playlist, media];
     }
     media.__state.addedToPlaylist = !media.__state.addedToPlaylist;
   },

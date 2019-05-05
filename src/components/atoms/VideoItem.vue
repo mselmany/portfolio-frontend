@@ -56,6 +56,7 @@
 
 <script>
 import { formatTime, raf } from "@/helpers/utils";
+import { updateProgressbar, changeVolume, playPause } from "@/helpers/media";
 
 export default {
 	name: "VideoItem",
@@ -155,14 +156,10 @@ export default {
 			}
 		},
 		updateProgressbar(event) {
-			const video = this.$refs.video,
-				progressBar = this.$refs.progressBar;
-
-			raf(() => {
-				const pos =
-					(event.pageX - progressBar.getBoundingClientRect().left) /
-					progressBar.offsetWidth;
-				video.currentTime = pos * video.duration;
+			updateProgressbar({
+				event,
+				source: this.$refs.video,
+				progressBar: this.$refs.progressBar
 			});
 
 			if (this.actions.onProgressChange) {
@@ -170,12 +167,7 @@ export default {
 			}
 		},
 		playPause() {
-			const video = this.$refs.video;
-			if (video.paused || video.ended) {
-				this.play();
-			} else {
-				this.pause();
-			}
+			playPause(this.$refs.video);
 
 			if (this.actions.onPlayStateChange) {
 				this.actions.onPlayStateChange(this.data.__state);
@@ -190,15 +182,7 @@ export default {
 			this.$refs.video.pause();
 		},
 		changeVolume() {
-			const video = this.$refs.video;
-			if (video.muted) {
-				video.muted = false;
-			} else if (video.volume <= 0.5) {
-				video.volume = 1;
-			} else if (!video.muted) {
-				video.muted = true;
-				video.volume = 0.5;
-			}
+			changeVolume(this.$refs.video);
 		},
 		disableStickyAndScroll() {
 			if (this.actions.sticky) {

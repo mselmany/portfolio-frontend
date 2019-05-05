@@ -1,7 +1,6 @@
 <template>
 	<div id="Social" class="Page">
 		<FilterList/>
-		<Player/>
 		<SocialList v-infinite-loader="loader"/>
 		<!-- <SocialList/> -->
 		<LoaderButton :action="loader" :limit="1">Yükle</LoaderButton>

@@ -16,6 +16,7 @@ export default {
 
     let media = getters.getMedia(id);
     let addedToPlaylist = media.__state.addedToPlaylist;
+
     let message = addedToPlaylist
       ? "ADDED_TO_PLAYLIST"
       : "REMOVED_FROM_PLAYLIST";

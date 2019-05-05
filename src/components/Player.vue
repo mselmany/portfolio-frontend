@@ -1,67 +1,80 @@
 <template>
-	<div class="Player">
-		<!-- <div class="Player__Controls"></div> -->
+	<div class="Player" v-if="list.length">
 		<ul class="Player__Playlist Utils--unorderedList">
 			<li
 				class="Player__PlaylistItem"
-				v-for="l in playlist"
+				v-for="l in list"
 				:key="l.id"
 				:class="{'__playing': l.__state.playing}"
 			>
 				<div class="Player__Line Player__LineCounter Utils--textEllipsis">
 					<span>{{l.meta.title}}</span>
-					<span class="Player__LineButton __play" @click="playPause(l)">
+					<span class="Player__LineButton Player__LineButton--play" @click="playPause(l)">
 						<div
 							class="Icon __mode-contain __actions __white"
 							:class="l.__state.playing ? '__pause' : '__play'"
 						></div>
 					</span>
-					<span class="Player__LineButton __remove" @click="removeFromPlaylist(l.id)">
-						<div class="Icon __mode-contain __actions __white __removeFromPlaylist"></div>
+					<span class="Player__LineButton Player__LineButton--remove" @click="toggleFromPlaylist(l.id)">
+						<div
+							class="Icon __mode-contain __actions __white"
+							:class="l.__state.addedToPlaylist ? '__removeFromPlaylist': '__addToPlaylist'"
+						></div>
 					</span>
 				</div>
-				<div class="Player__LineProgress" :style="{'width': l.__state.percentage + '%'}"></div>
+				<div
+					class="Player__Progress"
+					ref="progressBar"
+					@click="updateProgressbar"
+					v-if="l.__state.playing"
+				>
+					<div class="Player__ProgressRail">
+						<div class="Player__ProgressStatus" :style="{'width': l.__state.percentage + '%'}"></div>
+					</div>
+				</div>
 			</li>
 		</ul>
 	</div>
 </template>
 
 <script>
-import { mapMutations, mapGetters, mapActions, mapState } from "vuex";
-import {
-	TOGGLE_FROM_PLAYLIST,
-	UPDATE_CURRENT
-} from "@/store/modules/player/types";
+// TODO@3: Float/pin halindeki mediayı(diğerlerinide - video gibi..) resize edilebilir yap.
+// TODO@5: Autoplay,tekrar oynat, shuffle mode yap, ses butonu ekle
+import { updateProgressbar, playPause } from "@/helpers/media";
+import { mapActions, mapState } from "vuex";
+import { TOGGLE_FROM_PLAYLIST } from "@/store/modules/player/types";
 
 export default {
 	name: "Player",
-	data() {
-		return {};
-	},
 	computed: {
-		...mapState("player", ["playlist", "current"])
+		...mapState("player", ["playlist", "current"]),
+		list() {
+			let list = [];
+			if (this.current && !this.current.__state.addedToPlaylist) {
+				list = [this.current, ...this.playlist];
+			} else {
+				list = this.playlist;
+			}
+			return list;
+		}
 	},
-	watch: {},
 	methods: {
 		...mapActions("player", [TOGGLE_FROM_PLAYLIST]),
-		...mapMutations("player", [UPDATE_CURRENT]),
 		playPause(l) {
-			if (l.source.paused || l.source.ended) {
-				l.source.play();
-			} else {
-				l.source.pause();
-			}
+			playPause(l.source);
 		},
-		removeFromPlaylist(id) {
+		updateProgressbar(event) {
+			updateProgressbar({
+				event,
+				source: this.current.source,
+				progressBar: this.$refs.progressBar[0]
+			});
+		},
+		toggleFromPlaylist(id) {
 			this[TOGGLE_FROM_PLAYLIST](id);
 		}
 	}
 };
-
-/* TODO@5 : Sound componentinde audioyu set etme sadece placeholder koy.
-bunun yerine player storunda currente ata ve o anki mediayı player statınde çal.
-ayrıca tüm sitedeki media yı player storuna registeret, sadece store da oynat, tek biyerden(storedan yönet herşeyi)
- */
 </script>
 
 <style lang="postcss" scoped>
@@ -70,12 +83,13 @@ ayrıca tüm sitedeki media yı player storuna registeret, sadece store da oynat
 	--BackgroundColor: var(--DefaultColor);
 	--Color: var(--DefaultBackgroundColor);
 	--HoverBackgroundColor: #222;
+	--ProgressBgColor: rgba(255, 0, 0, 0.3);
 	--ProgressColor: #cd201f;
 
 	font-size: 0.85rem;
 	text-align: left;
 	width: 18em;
-	max-height: 25rem;
+	max-height: 22rem;
 	position: fixed;
 	bottom: 0.5rem;
 	right: 0.5rem;
@@ -84,10 +98,6 @@ ayrıca tüm sitedeki media yı player storuna registeret, sadece store da oynat
 	background-color: var(--BackgroundColor);
 	color: var(--Color);
 	user-select: none;
-
-	& .Player__Controls {
-		height: 5rem;
-	}
 
 	& .Player__Playlist {
 		counter-reset: Player;
@@ -119,20 +129,36 @@ ayrıca tüm sitedeki media yı player storuna registeret, sadece store da oynat
 			& .Player__LineCounter:before {
 				visibility: hidden;
 			}
-			& .Player__LineButton.__play {
+			& .Player__LineButton--play {
 				display: block;
 				color: transparent;
 			}
 		}
 	}
 
-	& .Player__LineProgress {
-		display: none;
-		width: auto;
-		height: 1px;
+	& .Player__Progress {
 		position: absolute;
 		left: 0;
+		right: 0;
 		bottom: 0;
+		padding-top: 0.4rem;
+		overflow: hidden;
+		cursor: pointer;
+
+		&:hover {
+			& .Player__ProgressRail {
+				background-color: var(--ProgressBgColor);
+			}
+		}
+	}
+
+	& .Player__ProgressRail {
+		width: 100%;
+	}
+
+	& .Player__ProgressStatus {
+		width: auto;
+		height: 1px;
 		background-color: var(--ProgressColor);
 	}
 
@@ -158,10 +184,10 @@ ayrıca tüm sitedeki media yı player storuna registeret, sadece store da oynat
 		background-color: currentColor;
 		box-shadow: 0 0 0.25rem 0.5rem currentColor;
 
-		&.__play {
+		&.Player__LineButton--play {
 			left: 0;
 		}
-		&.__remove {
+		&.Player__LineButton--remove {
 			right: 0;
 		}
 	}

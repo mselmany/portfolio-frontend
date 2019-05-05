@@ -1,13 +1,12 @@
 <template>
 	<figure class="Sound">
-		<!-- <audio ref="audio" preload="metadata" :src="data.src"></audio> -->
 		<div class="Sound__Player" :class="{'Sound__Player--touched': media.__state.playing}">
 			<div
 				class="Sound__Artwork"
 				@click="playPause()"
 				:style="{'transform': `rotate(${(media.__state.currentTime % 360) * 2.5}deg) translateZ(0)`}"
 			>
-				<img draggable="false" :src="data.artwork">
+				<img draggable="false" :src="media.meta.artwork">
 			</div>
 			<div
 				class="Sound__Progress"
@@ -21,14 +20,14 @@
 			</div>
 		</div>
 		<div class="Sound__Meta">
-			<div class="Sound__Actions __oneLine">
+			<div class="Sound__MetaLine Sound__Actions Utils--textEllipsis">
 				<div class="Sound__Button" @click="playPause()">
 					<div
 						class="Icon __mode-contain __actions __black"
 						:class="media.__state.playing ? '__pause': '__play'"
 					></div>
 				</div>
-				<div class="Sound__Button" @click="addToPlaylist();">
+				<div class="Sound__Button" @click="toggleFromPlaylist();">
 					<div
 						class="Icon __mode-contain __actions __black"
 						:class="media.__state.addedToPlaylist ? '__toggleToPlaylist': '__addToPlaylist'"
@@ -38,66 +37,31 @@
 					class="Utils--tabular"
 				>{{media.__state.formattedCurrentTime}}∙{{media.__state.formattedDuration}}</span>
 			</div>
-			<div class="Sound__Title __oneLine" v-if="data.title">
-				<span>{{data.title}}</span>
+			<div class="Sound__MetaLine Sound__Title Utils--textEllipsis" v-if="media.meta.title">
+				<span>{{media.meta.title}}</span>
 			</div>
-			<div class="Sound__Label __oneLine" v-if="data.label">
-				<span>{{data.label}}</span>
+			<div class="Sound__MetaLine Sound__Label Utils--textEllipsis" v-if="media.meta.label">
+				<span>{{media.meta.label}}</span>
 			</div>
 		</div>
 	</figure>
 </template>
 
 <script>
-import { formatTime, raf, generateId, error } from "@/helpers/utils";
+// TODO@3: Progressbar mouse sürükle-bırak ile ileri-geri sarılabilmeli.
 import { updateProgressbar, changeVolume, playPause } from "@/helpers/media";
-import { mapActions, mapMutations, mapState, mapGetters } from "vuex";
-import {
-	TOGGLE_FROM_PLAYLIST,
-	REGISTER,
-	UPDATE_STATUS,
-	UPDATE_CURRENT
-} from "@/store/modules/player/types";
 
 export default {
 	name: "SoundItem",
 	props: {
-		data: {
+		media: {
 			type: Object,
 			required: true
 		}
 	},
-	data() {
-		return {
-			id: this.data.id
-		};
-	},
-	computed: {
-		...mapGetters("player", ["getMedia"]),
-		media() {
-			return this.getMedia(this.id);
-		}
-	},
-	created() {
-		this[REGISTER]({
-			id: this.id,
-			type: "sound",
-			src: this.data.src,
-			meta: {
-				title: this.data.title,
-				label: this.data.label
-			}
-		});
-		// TODO@3: Progressbar mouse sürükle-bırak ile ileri-geri sarılabilmeli.
-		// TODO@3: Float/pin halindeki mediayı(audio) resize edilebilir yap.
-	},
-	beforeDestroy() {
-		this.media.source.pause();
-	},
 	methods: {
-		...mapActions("player", [REGISTER, TOGGLE_FROM_PLAYLIST]),
-		addToPlaylist() {
-			this[TOGGLE_FROM_PLAYLIST](this.id);
+		toggleFromPlaylist() {
+			this.$emit("toggleFromPlaylist", this.media.id);
 		},
 		updateProgressbar(event) {
 			updateProgressbar({
@@ -114,17 +78,6 @@ export default {
 		},
 		changeVolume() {
 			changeVolume(this.media.source);
-		},
-		disableStickyAndScroll() {
-			if (this.actions.sticky) {
-				this.actions.sticky.disable({ scrollTo: this.$el });
-			}
-		},
-		disableStickyAndPause() {
-			this.media.source.pause();
-			if (this.actions.sticky && this.actions.sticky.active) {
-				this.actions.sticky.disable();
-			}
 		}
 	}
 };
@@ -263,26 +216,8 @@ export default {
 		font-style: italic;
 	}
 
-	& .__oneLine {
-		overflow: hidden;
-		white-space: nowrap;
-		text-overflow: ellipsis;
-		&:not(:last-child) {
-			padding-bottom: 0.5rem;
-		}
+	& .Sound__MetaLine:not(:last-child) {
+		padding-bottom: 0.5rem;
 	}
-
-	/* & .Sound--playing {
-		animation: Sound--playing 10s linear infinite;
-	} */
 }
-
-/* @keyframes Sound--playing {
-	from {
-		transform: rotate(0);
-	}
-	to {
-		transform: rotate(1turn);
-	}
-} */
 </style>
