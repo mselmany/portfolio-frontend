@@ -1,4 +1,4 @@
-import { ADD, MARK_AS_VIEWED } from "./types";
+import { ADD, MARK_AS_VIEWED, INJECT_DATA } from "./types";
 import { INIT } from "@/store/modules/common/types";
 import { error, is, sortBy, modify, markAsViewed } from "@/helpers/utils";
 
@@ -46,5 +46,9 @@ export default {
         page: state.page
       })
     ];
+  },
+  [INJECT_DATA](state, { id, data }) {
+    const item = state.viewed.find(item => item.__computed.id === id);
+    item.__injected = data;
   }
 };

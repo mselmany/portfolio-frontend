@@ -7,24 +7,24 @@
 
 <script>
 export default {
-	name: "Home",
-	data() {
-		return {
-			list: [],
-			page: 1,
-			pageToken: ""
-		};
-	},
-	methods: {
-		async loader() {
-			// const r = await this.$api.get(
-			//   "/bucket/list" /* {
-			//   params: { filter: "twitter,github,medium,pocket" }
-			// } */
-			// );
-			// console.log(r);
-		}
-	}
+  name: "Home",
+  data() {
+    return {
+      list: [],
+      page: 1,
+      pageToken: ""
+    };
+  },
+  methods: {
+    async loader() {
+      // const r = await this.$api.get(
+      //   "/bucket/list" /* {
+      //   params: { filter: "twitter,github,medium,pocket" }
+      // } */
+      // );
+      // console.log(r);
+    }
+  }
 };
 </script>
 

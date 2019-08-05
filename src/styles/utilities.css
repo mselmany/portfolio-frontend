@@ -14,3 +14,26 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.Placeholder--active .Placeholder {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  color: transparent !important;
+  box-shadow: none !important;
+  border-radius: 5px;
+
+  &.Placeholder--1-2 {
+    width: 50% !important;
+  }
+  &.Placeholder--1-3 {
+    width: 33.33% !important;
+  }
+  &.Placeholder--3-4 {
+    width: 75% !important;
+  }
+
+  & > * {
+    visibility: hidden;
+    pointer-events: none;
+    cursor: default;
+  }
+}

@@ -77,7 +77,7 @@ class Soundcloud extends ApiBase {
   async track({ id } = {}) {
     try {
       this.required({ id });
-      return await this.get(`/tracks/${id}`);
+      return await this.get(`/track/${id}`);
     } catch (err) {
       this.error(err);
     }

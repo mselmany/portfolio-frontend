@@ -90,6 +90,9 @@ export default {
 			visibility: visible;
 			opacity: 1;
 			transform: translateY(0);
+			&::before {
+				display: block;
+			}
 		}
 	}
 
@@ -111,8 +114,7 @@ export default {
 			position: absolute;
 			left: -2em;
 			top: 0;
-			opacity: 0;
-			visibility: visible;
+			display: none;
 		}
 		&::after {
 			content: "";

@@ -203,6 +203,13 @@ export default {
 		padding-left: 1rem;
 	}
 
+	& .Sound__MetaLine {
+		min-height: 1.3rem;
+		&:not(:last-child) {
+			margin-bottom: 0.5rem;
+		}
+	}
+
 	& .Sound__Actions {
 		font-size: 0.85rem;
 	}
@@ -214,10 +221,6 @@ export default {
 	& .Sound__Label {
 		font-family: "Playfair Display";
 		font-style: italic;
-	}
-
-	& .Sound__MetaLine:not(:last-child) {
-		padding-bottom: 0.5rem;
 	}
 }
 </style>

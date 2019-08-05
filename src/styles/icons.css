@@ -167,4 +167,22 @@
   &.__tick2 {
     background-image: url("../assets/icon_tick2.svg");
   }
+  &.__fork {
+    background-image: url("../assets/icon_fork.svg");
+  }
+  &.__star {
+    background-image: url("../assets/icon_star.svg");
+  }
+  &.__eye2 {
+    background-image: url("../assets/icon_eye2.svg");
+  }
+  &.__document {
+    background-image: url("../assets/icon_document.svg");
+  }
+  &.__comment {
+    background-image: url("../assets/icon_comment.svg");
+  }
+  &.__folder {
+    background-image: url("../assets/icon_folder.svg");
+  }
 }

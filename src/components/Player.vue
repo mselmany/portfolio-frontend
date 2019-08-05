@@ -38,6 +38,7 @@
 </template>
 
 <script>
+// TODO@5: Geliştir!!
 // TODO@3: Float/pin halindeki mediayı(diğerlerinide - video gibi..) resize edilebilir yap.
 // TODO@5: Autoplay,tekrar oynat, shuffle mode yap, ses butonu ekle
 import { updateProgressbar, playPause } from "@/helpers/media";

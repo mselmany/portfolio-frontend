@@ -232,3 +232,10 @@ export function formatTime(time) {
 
   return `${hours}${minutes}:${seconds}`;
 }
+
+export function formatNumber(value) {
+  if (typeof value !== "number") {
+    return value;
+  }
+  return new Intl.NumberFormat().format(value);
+}

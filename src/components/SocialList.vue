@@ -60,7 +60,7 @@ export default {
 	--Padding: var(--DefaultLayoutPadding);
 	--Transition: var(--DefaultTransition);
 	--BackgroundColor: var(--DefaultColor);
-	--SocialItem_Margin: 2.5rem;
+	--SocialItem_Margin: 3rem;
 	font-size: 1rem;
 	width: 100%;
 	max-width: var(--Size);

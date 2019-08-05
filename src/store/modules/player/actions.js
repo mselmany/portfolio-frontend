@@ -37,7 +37,7 @@ export default {
       { root: true }
     );
   },
-  [REGISTER]({ commit }, data) {
+  async [REGISTER]({ commit }, data) {
     const { id } = data;
 
     let audio = document.createElement("audio");

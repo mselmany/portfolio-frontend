@@ -13,16 +13,16 @@
 import { mapState } from "vuex";
 
 export default {
-	name: "app",
-	computed: {
-		...mapState("common", ["css"])
-	}
+  name: "app",
+  computed: {
+    ...mapState("common", ["css"])
+  }
 };
 </script>
 
 <style lang="postcss">
 @import url("./styles/index.css");
 #app {
-	height: 100%;
+  height: 100%;
 }
 </style>

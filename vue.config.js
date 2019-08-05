@@ -1,7 +1,9 @@
 module.exports = {
   pwa: {
-    name: "portfolio-app"
+    name: "portfolio-app",
+    themeColor: "#3EFFD4"
   },
+
   devServer: {
     proxy: {
       "/api": {
@@ -14,7 +16,10 @@ module.exports = {
       }
     }
   },
+
   configureWebpack: {
     devtool: "source-map"
-  }
+  },
+
+  lintOnSave: undefined
 };

@@ -2,10 +2,7 @@ import Vue from "vue";
 
 import atoms from "./atoms";
 import molecules from "./molecules";
-
-import Dribbble from "./Dribbble";
-import Twitter from "./Twitter";
-import Soundcloud from "./Soundcloud";
+import socialitems from "./socialitems";
 
 import Toolbox from "./Toolbox";
 import SidebarMenu from "./SidebarMenu";
@@ -15,12 +12,6 @@ import LoaderButton from "./LoaderButton";
 import Notification from "./Notification";
 import InfiniteLoader from "./InfiniteLoader";
 import Player from "./Player";
-
-const socialitems = {
-  Dribbble,
-  Twitter,
-  Soundcloud
-};
 
 const components = {
   ...atoms,

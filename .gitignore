@@ -2,6 +2,7 @@
 node_modules
 /dist
 /src/mock/assets
+.history
 
 # local env files
 .env.local
