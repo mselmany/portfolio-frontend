@@ -1,7 +1,7 @@
 <template>
 	<div class="Soundcloud __withMedia" v-if="track">
-		<MetaInfo :meta="meta"/>
-		<SoundItem :media="media" @toggleFromPlaylist="toggleFromPlaylist"/>
+		<MetaInfo :meta="meta" />
+		<SoundItem :media="media" @toggleFromPlaylist="toggleFromPlaylist" />
 	</div>
 </template>
 

@@ -6,7 +6,7 @@
 				@click="playPause()"
 				:style="{'transform': `rotate(${(media.__state.currentTime % 360) * 2.5}deg) translateZ(0)`}"
 			>
-				<img draggable="false" :src="media.meta.artwork">
+				<img draggable="false" :src="media.meta.artwork" />
 			</div>
 			<div
 				class="Sound__Progress"
