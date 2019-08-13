@@ -27,14 +27,14 @@ export default {
       description: "mselmany",
       icon: "__soundcloud",
       selected: true
-    }
-    /* ,{
+    },
+    {
       type: "raindrop",
       name: "Raindrop",
       description: "numano",
       icon: "__raindrop",
       selected: true
-    },
+    } /* ,
     {
       type: "youtube",
       name: "Youtube",

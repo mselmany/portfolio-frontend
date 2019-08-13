@@ -51,6 +51,10 @@ export default {
 		GITHUB_GISTS: {
 			tr: " kod ekledi",
 			en: "coded "
+		},
+		RAINDROP_BOOKMARKS: {
+			tr: " yer imlerine eklendi",
+			en: " bookmarked"
 		}
 	},
 	methods: {

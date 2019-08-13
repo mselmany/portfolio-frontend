@@ -185,4 +185,7 @@
   &.__folder {
     background-image: url("../assets/icon_folder.svg");
   }
+  &.__link {
+    background-image: url("../assets/icon_link.svg");
+  }
 }
